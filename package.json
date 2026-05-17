@@ -1,0 +1,18 @@
+{
+  "name": "familylink",
+  "version": "0.0.1",
+  "private": true,
+  "description": "FamilyLink - Family location sharing app",
+  "scripts": {
+    "dev:services": "docker compose up -d",
+    "dev:services:stop": "docker compose down",
+    "dev:backend": "npm run dev --prefix backend",
+    "dev:frontend": "npm run dev --prefix frontend",
+    "build:backend": "npm run build --prefix backend",
+    "build:frontend": "npm run build --prefix frontend",
+    "lint": "npm run lint --prefix backend && npm run lint --prefix frontend",
+    "test": "npm run test --prefix backend && npm run test --prefix frontend",
+    "test:e2e": "npx playwright test --config frontend/playwright.config.ts",
+    "install:all": "npm install --prefix backend && npm install --prefix frontend"
+  }
+}

@@ -1,0 +1,1 @@
+export { FCMNotificationAdapter } from './FCMNotificationAdapter';

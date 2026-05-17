@@ -1,0 +1,18 @@
+﻿{
+  "app": {
+    "title": "FamilyLink",
+    "loading": "Loading...",
+    "error": "An error occurred"
+  },
+  "auth": {
+    "login": "Log in",
+    "register": "Sign up",
+    "email": "Email",
+    "password": "Password",
+    "logout": "Log out"
+  },
+  "map": {
+    "shareLocation": "Share location",
+    "loading": "Loading locations..."
+  }
+}

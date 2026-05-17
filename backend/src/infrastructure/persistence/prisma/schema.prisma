@@ -1,0 +1,153 @@
+﻿generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  username     String
+  passwordHash String   @map("password_hash")
+  language     String   @default("es")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  circleMembers   CircleMember[]
+  locationUpdates LocationUpdate[]
+  invitationsSent Invitation[]     @relation("InvitedBy")
+  refreshTokens   RefreshToken[]
+  dailyLimits     DailyLimit[]
+
+  @@map("users")
+}
+
+model Circle {
+  id        String   @id @default(uuid())
+  name      String
+  createdBy String   @map("created_by")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  members         CircleMember[]
+  zones           Zone[]
+  locationUpdates LocationUpdate[]
+  invitations     Invitation[]
+
+  @@map("circles")
+}
+
+enum CircleRole {
+  CIRCLE_ADMIN
+  CIRCLE_MEMBER
+}
+
+model CircleMember {
+  id       String     @id @default(uuid())
+  userId   String     @map("user_id")
+  circleId String     @map("circle_id")
+  role     CircleRole @default(CIRCLE_MEMBER)
+  joinedAt DateTime   @default(now()) @map("joined_at")
+
+  privacyModeActive    Boolean   @default(false) @map("privacy_mode_active")
+  privacyModeExpiresAt DateTime? @map("privacy_mode_expires_at")
+  privacyActivationsToday Int    @default(0) @map("privacy_activations_today")
+  privacyActivationsResetAt DateTime? @map("privacy_activations_reset_at")
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  circle Circle @relation(fields: [circleId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, circleId])
+  @@index([circleId])
+  @@index([userId])
+  @@map("circle_members")
+}
+
+model Zone {
+  id       String  @id @default(uuid())
+  circleId String  @map("circle_id")
+  name     String
+  nameEn   String? @map("name_en")
+  colorHex String  @map("color_hex")
+  polygon  Json
+  areaSqm  Float   @map("area_sqm")
+  active   Boolean @default(true)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  circle Circle @relation(fields: [circleId], references: [id], onDelete: Cascade)
+
+  @@index([circleId])
+  @@map("zones")
+}
+
+model LocationUpdate {
+  id         String   @id @default(uuid())
+  userId     String   @map("user_id")
+  circleId   String   @map("circle_id")
+  latitude   Float
+  longitude  Float
+  capturedAt DateTime @map("captured_at")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  circle Circle @relation(fields: [circleId], references: [id], onDelete: Cascade)
+
+  @@index([userId, capturedAt])
+  @@index([circleId, capturedAt])
+  @@map("location_updates")
+}
+
+model Invitation {
+  id        String           @id @default(uuid())
+  circleId  String           @map("circle_id")
+  invitedBy String           @map("invited_by")
+  email     String
+  status    InvitationStatus @default(PENDING)
+  expiresAt DateTime         @map("expires_at")
+  createdAt DateTime         @default(now()) @map("created_at")
+
+  circle  Circle @relation(fields: [circleId], references: [id], onDelete: Cascade)
+  inviter User   @relation("InvitedBy", fields: [invitedBy], references: [id])
+
+  @@index([circleId])
+  @@index([email])
+  @@map("invitations")
+}
+
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  EXPIRED
+  CANCELLED
+}
+
+model DailyLimit {
+  id       String @id @default(uuid())
+  userId   String @map("user_id")
+  circleId String @map("circle_id")
+  limit    Int    @default(100)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, circleId])
+  @@map("daily_limits")
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  token     String   @unique
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  revokedAt DateTime? @map("revoked_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([token])
+  @@map("refresh_tokens")
+}

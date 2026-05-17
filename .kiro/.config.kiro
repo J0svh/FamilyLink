@@ -2,6 +2,7 @@
   "specId": "dfc6c788-d498-411e-8161-265ca5a67b63",
   "workflowType": "requirements-first",
   "specType": "feature",
+  "defaultAgent": "team-lead",
   "mcpServers": {
     "engram": {
       "type": "stdio",
