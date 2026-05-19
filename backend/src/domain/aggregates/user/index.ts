@@ -1,1 +1,1 @@
-﻿export { User, UserProps, PrivacyModeState } from './User';
+export { User, UserProps, PrivacyModeState } from './User';

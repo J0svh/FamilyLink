@@ -1,2 +1,2 @@
-﻿export { ZoneEvaluationService } from './ZoneEvaluationService';
+export { ZoneEvaluationService, ZoneTransition } from './ZoneEvaluationService';
 export { DailyLimitService } from './DailyLimitService';

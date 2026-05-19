@@ -1,4 +1,4 @@
-﻿import { UserId } from '../../value-objects/UserId';
+import { UserId } from '../../value-objects/UserId';
 import { CircleRole } from './CircleRole';
 
 export interface CircleMemberProps {

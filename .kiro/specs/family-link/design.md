@@ -10,7 +10,7 @@
 
 | Capa | Tecnología | Hosting |
 |------|-----------|---------|
-| Frontend | React 18 + TypeScript + Vite + Leaflet/OSM | Vercel (free) |
+| Frontend | React 18 + TypeScript + Vite + Tailwind CSS 4 + MapLibre GL | Vercel (free) |
 | Backend | Node.js 20 + Express + TypeScript | Render (free) |
 | Base de datos | PostgreSQL 16 + Prisma ORM | Railway (free) |
 | Cache | Redis (Upstash free tier) | Upstash (free) |
@@ -33,7 +33,7 @@
 graph TB
   subgraph FRONTEND["🖥️ Frontend (React + Vite)"]
     UI[UI Components]
-    MAP[Map · Leaflet + OSM]
+    MAP[Map · MapLibre GL + MapTiler]
     STORE[Zustand + React Query]
   end
   subgraph GATEWAY["🔀 API Gateway (Express)"]
@@ -207,11 +207,15 @@ Todas las tecnologías seleccionadas cumplen la restricción **COST-1** (plan gr
 | React | 18.x | UI framework | ✅ Gratuito |
 | TypeScript | 5.x | Tipado estático | ✅ Gratuito |
 | Vite | 5.x | Build tool + dev server | ✅ Gratuito |
-| Leaflet + React-Leaflet | 1.9.x | Mapas interactivos | ✅ Gratuito |
-| OpenStreetMap | — | Tiles de mapa | ✅ Gratuito |
+| Tailwind CSS | 4.x | Utility-first CSS framework | ✅ Gratuito |
+| MapLibre GL JS | 4.x | Mapas vectoriales 3D interactivos | ✅ Gratuito |
+| react-map-gl | 7.x | Wrapper React para MapLibre GL | ✅ Gratuito |
+| MapTiler | Free tier | Teselas vectoriales + estilos (streets, dark, satellite) | ✅ Gratuito (100k tiles/mes) |
+| @mapbox/mapbox-gl-draw | 1.x | Dibujo de polígonos (geocercas) | ✅ Gratuito |
 | Zustand | 4.x | Gestión de estado global | ✅ Gratuito |
 | React Query (TanStack) | 5.x | Server state + caché | ✅ Gratuito |
 | i18next | 23.x | Internacionalización | ✅ Gratuito |
+| Framer Motion | 11.x | Animaciones fluidas estilo Apple | ✅ Gratuito |
 
 #### Backend
 | Tecnología | Versión | Rol | Coste |

@@ -1,4 +1,4 @@
-﻿import { CircleId } from '../../value-objects/CircleId';
+import { CircleId } from '../../value-objects/CircleId';
 import { UserId } from '../../value-objects/UserId';
 import { DomainEvent } from '../../events/DomainEvent';
 import { CircleCreated } from '../../events/CircleCreated';

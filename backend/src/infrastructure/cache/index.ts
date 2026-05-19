@@ -1,1 +1,1 @@
-export {};
+export { UpstashLocationCache } from './UpstashLocationCache';

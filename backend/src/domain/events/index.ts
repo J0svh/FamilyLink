@@ -1,4 +1,4 @@
-﻿export { DomainEvent } from './DomainEvent';
+export { DomainEvent } from './DomainEvent';
 export { LocationShared } from './LocationShared';
 export { ZoneEntered } from './ZoneEntered';
 export { ZoneExited } from './ZoneExited';

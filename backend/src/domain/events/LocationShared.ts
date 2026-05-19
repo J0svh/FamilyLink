@@ -1,4 +1,4 @@
-﻿import { DomainEvent } from './DomainEvent';
+import { DomainEvent } from './DomainEvent';
 import { UserId } from '../value-objects/UserId';
 import { CircleId } from '../value-objects/CircleId';
 import { Coordinates } from '../value-objects/Coordinates';

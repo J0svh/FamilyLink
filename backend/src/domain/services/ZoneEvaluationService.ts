@@ -1,5 +1,6 @@
-﻿import { Zone } from '../entities/Zone';
 import { Coordinates } from '../value-objects/Coordinates';
+import { Zone } from '../entities/Zone';
+import { Vertex } from '../value-objects/ZonePolygon';
 
 export interface ZoneTransition {
   zone: Zone;
@@ -8,50 +9,41 @@ export interface ZoneTransition {
 
 export class ZoneEvaluationService {
   /**
-   * Evaluates which active zones contain the given point.
-   * Uses ray-casting algorithm for point-in-polygon detection.
+   * Evaluates whether a point (location) is inside any of the given zones.
+   * Returns the list of zones that contain the point.
    */
-  evaluatePoint(point: Coordinates, zones: Zone[]): Zone[] {
-    return zones.filter(zone => {
-      if (!zone.isActive()) return false;
-      return this.isPointInPolygon(point, zone);
-    });
+  evaluatePoint(coordinates: Coordinates, zones: Zone[]): Zone[] {
+    const activeZones = zones.filter(z => z.isActive());
+    return activeZones.filter(zone => this.isPointInPolygon(coordinates, zone));
   }
 
   /**
-   * Evaluates zone transitions between two coordinate positions.
-   * Returns zones that were entered or exited.
+   * Evaluates zone transitions between a previous location and a new location.
+   * Returns which zones were entered and which were exited.
    */
   evaluateTransitions(
-    previousCoords: Coordinates | null,
-    newCoords: Coordinates,
+    previousCoordinates: Coordinates | null,
+    newCoordinates: Coordinates,
     zones: Zone[],
   ): ZoneTransition[] {
+    const activeZones = zones.filter(z => z.isActive());
     const transitions: ZoneTransition[] = [];
 
-    const activeZones = zones.filter(z => z.isActive());
+    const previousZones = previousCoordinates
+      ? new Set(activeZones.filter(z => this.isPointInPolygon(previousCoordinates, z)).map(z => z.getId().getValue()))
+      : new Set<string>();
 
-    const previousZones = previousCoords
-      ? this.evaluatePoint(previousCoords, activeZones)
-      : [];
-    const currentZones = this.evaluatePoint(newCoords, activeZones);
+    const currentZones = new Set(
+      activeZones.filter(z => this.isPointInPolygon(newCoordinates, z)).map(z => z.getId().getValue()),
+    );
 
-    // Detect entries: in current but not in previous
-    for (const zone of currentZones) {
-      const wasInZone = previousZones.some(
-        pz => pz.getId().equals(zone.getId()),
-      );
-      if (!wasInZone) {
+    // Zones entered: in current but not in previous
+    for (const zone of activeZones) {
+      const zoneId = zone.getId().getValue();
+      if (currentZones.has(zoneId) && !previousZones.has(zoneId)) {
         transitions.push({ zone, type: 'entered' });
       }
-    }
-
-    // Detect exits: in previous but not in current
-    for (const zone of previousZones) {
-      const isInZone = currentZones.some(
-        cz => cz.getId().equals(zone.getId()),
-      );
-      if (!isInZone) {
+      if (!currentZones.has(zoneId) && previousZones.has(zoneId)) {
         transitions.push({ zone, type: 'exited' });
       }
     }
@@ -60,15 +52,20 @@ export class ZoneEvaluationService {
   }
 
   /**
-   * Ray-casting algorithm for point-in-polygon detection.
-   * Works for both convex and concave polygons.
+   * Ray-casting algorithm to determine if a point is inside a polygon.
+   * Casts a ray from the point to the right and counts intersections.
+   * Odd number of intersections = inside.
    */
-  private isPointInPolygon(point: Coordinates, zone: Zone): boolean {
+  private isPointInPolygon(coordinates: Coordinates, zone: Zone): boolean {
     const vertices = zone.getPolygon().getVertices();
-    const n = vertices.length;
-    const lat = point.getLatitude();
-    const lng = point.getLongitude();
+    const lat = coordinates.getLatitude();
+    const lng = coordinates.getLongitude();
 
+    return this.raycast(lat, lng, vertices);
+  }
+
+  private raycast(lat: number, lng: number, vertices: ReadonlyArray<Vertex>): boolean {
+    const n = vertices.length;
     let inside = false;
 
     for (let i = 0, j = n - 1; i < n; j = i++) {
@@ -76,8 +73,8 @@ export class ZoneEvaluationService {
       const vj = vertices[j];
 
       if (
-        (vi.lng > lng) !== (vj.lng > lng) &&
-        lat < ((vj.lat - vi.lat) * (lng - vi.lng)) / (vj.lng - vi.lng) + vi.lat
+        (vi.lat > lat) !== (vj.lat > lat) &&
+        lng < ((vj.lng - vi.lng) * (lat - vi.lat)) / (vj.lat - vi.lat) + vi.lng
       ) {
         inside = !inside;
       }

@@ -171,33 +171,45 @@
 
 ---
 
-## Task 5: Frontend (React + TypeScript)
+## Task 5: Frontend (React + TypeScript + Tailwind + MapLibre)
 
 > Depende de: Task 1 (setup)
 > Puede desarrollarse en paralelo con Tasks 3–4
+> Diseño: estilo Apple minimalista (Inter, espaciado generoso, bordes redondeados, animaciones sutiles)
+> Paleta: fondo #FAFAFA, cards #FFFFFF, acento #007AFF, texto #1D1D1F, secundario #86868B
 
 - [ ] 5.1 Configuración base
+  - Tailwind CSS 4 configurado con Vite (paleta custom, dark mode con `prefers-color-scheme`)
   - React Router con lazy loading por ruta
   - Zustand stores: `authStore`, `circleStore`, `mapStore`
   - API client con Axios: instancia con baseURL, interceptor para añadir JWT, interceptor para refresh automático
   - React Query: configuración global, invalidación de caché
+  - Framer Motion para animaciones de transición entre páginas
 - [ ] 5.2 Auth pages
-  - `LoginPage` — formulario email/contraseña, manejo de errores, redirect a dashboard
+  - `LoginPage` — formulario email/contraseña, estilo Apple (card centrada, sombra sutil, bordes 12px)
   - `RegisterPage` — formulario con validación client-side, feedback de errores del servidor
   - Protección de rutas privadas (`PrivateRoute`)
+  - Logo tipográfico "FamilyLink" en Inter 600 con color acento
 - [ ] 5.3 Dashboard
-  - Lista de círculos del usuario con rol
-  - Botón "Crear círculo" con modal
+  - Lista de círculos del usuario con rol (cards con sombra, avatar circular)
+  - Botón "Crear círculo" con modal animado (Framer Motion)
   - Navegación a vista de mapa por círculo
-- [ ] 5.4 Map page
-  - Integración Leaflet + React-Leaflet con tiles OpenStreetMap
-  - `MemberMarker` — marcador por miembro con nombre y timestamp de última ubicación
-  - `ZoneLayer` — renderizado de polígonos con color hexadecimal asignado
-  - Botón "Compartir ubicación" con feedback de éxito/error
+- [ ] 5.4 Map page (MapLibre GL)
+  - Integración MapLibre GL JS via `react-map-gl` con teselas MapTiler (free tier)
+  - Selector de estilos de mapa: Streets, Dark/Nocturno, Satellite (MapTiler free styles)
+  - Vista 3D: edificios extruidos, pitch (inclinación) y bearing (rotación) habilitados
+  - `MemberMarker` — marcador HTML custom con avatar circular, nombre y timestamp
+  - Animación de pulso CSS en el marcador del usuario activo
+  - `ZoneLayer` — renderizado de polígonos con color hexadecimal y opacidad
+  - Botón "Compartir ubicación" con feedback de éxito/error (animación check)
   - Actualización en tiempo real via Socket.IO (sin recargar página)
-  - Mensaje "Cargando ubicaciones..." con reintento cada 30s si falla la carga (AC-10.6)
+  - Mensaje "Cargando ubicaciones..." con reintento cada 30s si falla la carga
 - [ ] 5.5 Zone drawer
-  - Herramienta de dibujo de polígonos sobre el mapa (Leaflet.draw o similar)
+  - Herramienta de dibujo de polígonos con `@mapbox/mapbox-gl-draw` (compatible MapLibre)
+  - `ZoneColorPicker` — selector de color hexadecimal
+  - Formulario de nombre (con campo opcional en inglés para i18n)
+  - Validación client-side: mínimo 3 vértices, área mínima
+  - Preview del polígono con color seleccionado antes de guardar
   - `ZoneColorPicker` — selector de color hexadecimal
   - Formulario de nombre (con campo opcional en inglés para i18n)
   - Validación client-side: mínimo 3 vértices, área mínima
@@ -229,6 +241,13 @@
   - Tests con Vitest + React Testing Library para componentes críticos
   - Tests para hooks: `useAuth`, `useSocket`, `useLocation`
   - Objetivo: 80% cobertura en componentes
+- [ ] 5.12 Chat del círculo (si hay tiempo)
+  - Componente `CircleChat` con mensajes en tiempo real (Socket.IO)
+  - Selector de emojis con `emoji-mart`
+  - Integración Tenor API para GIFs (free, sin límite real)
+  - Avatares de miembros junto a mensajes
+  - Modelo `Message` en Prisma + use cases SendMessage, GetMessages
+  - Rate limiting: máx. 30 mensajes/minuto por usuario
 
 ---
 

@@ -1,4 +1,4 @@
-﻿import { UserId } from '../value-objects/UserId';
+import { UserId } from '../value-objects/UserId';
 
 export interface RefreshTokenEntity {
   id: string;

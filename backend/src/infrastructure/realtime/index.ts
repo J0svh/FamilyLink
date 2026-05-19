@@ -1,1 +1,1 @@
-export {};
+export { SocketIOEventPublisher } from './SocketIOEventPublisher';
