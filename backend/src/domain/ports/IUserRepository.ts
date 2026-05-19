@@ -1,4 +1,4 @@
-﻿import { User } from '../aggregates/user/User';
+import { User } from '../aggregates/user/User';
 import { UserId } from '../value-objects/UserId';
 import { Email } from '../value-objects/Email';
 

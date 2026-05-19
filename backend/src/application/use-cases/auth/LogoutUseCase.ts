@@ -1,4 +1,4 @@
-﻿import { IRefreshTokenRepository } from '../../../domain/ports/IRefreshTokenRepository';
+import { IRefreshTokenRepository } from '../../../domain/ports/IRefreshTokenRepository';
 import { LogoutInputDTO } from '../../dtos/auth/LogoutDTO';
 import { AppError } from '../../../shared/AppError';
 

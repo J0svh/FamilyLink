@@ -1,4 +1,4 @@
-﻿export interface RefreshTokenInputDTO {
+export interface RefreshTokenInputDTO {
   refreshToken: string;
 }
 

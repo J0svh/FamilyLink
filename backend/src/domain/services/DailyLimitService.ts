@@ -1,27 +1,32 @@
-﻿import { DailyLimit } from '../value-objects/DailyLimit';
+import { DailyLimit } from '../value-objects/DailyLimit';
 
 export class DailyLimitService {
-  private static readonly DEFAULT_DAILY_LIMIT = 100;
-
   /**
-   * Checks if the daily limit has been reached.
+   * Checks if a user has reached their daily location sharing limit.
+   * @param currentCount - Number of location updates shared today
+   * @param limit - The configured daily limit for the user in this circle
+   * @returns true if the limit has been reached or exceeded
    */
   isLimitReached(currentCount: number, limit: DailyLimit): boolean {
-    return currentCount >= limit.getValue();
+    return limit.isExceeded(currentCount);
   }
 
   /**
-   * Returns the number of remaining shares for the day.
+   * Calculates remaining shares for today.
+   * @param currentCount - Number of location updates shared today
+   * @param limit - The configured daily limit
+   * @returns Number of remaining shares (minimum 0)
    */
   getRemainingShares(currentCount: number, limit: DailyLimit): number {
     const remaining = limit.getValue() - currentCount;
-    return remaining > 0 ? remaining : 0;
+    return Math.max(0, remaining);
   }
 
   /**
-   * Returns the default daily limit.
+   * Gets the default daily limit value.
+   * Used when no custom limit is configured for a user in a circle.
    */
   getDefaultLimit(): DailyLimit {
-    return DailyLimit.create(DailyLimitService.DEFAULT_DAILY_LIMIT);
+    return DailyLimit.create(100);
   }
 }
