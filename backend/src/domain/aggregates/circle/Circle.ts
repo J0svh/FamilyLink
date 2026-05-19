@@ -1,7 +1,9 @@
 import { CircleId } from '../../value-objects/CircleId';
 import { UserId } from '../../value-objects/UserId';
+
 import { DomainEvent } from '../../events/DomainEvent';
 import { CircleCreated } from '../../events/CircleCreated';
+
 import { CircleMember } from './CircleMember';
 import { CircleRole } from './CircleRole';
 

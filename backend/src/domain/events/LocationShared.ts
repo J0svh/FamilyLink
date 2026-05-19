@@ -1,7 +1,8 @@
-import { DomainEvent } from './DomainEvent';
 import { UserId } from '../value-objects/UserId';
 import { CircleId } from '../value-objects/CircleId';
 import { Coordinates } from '../value-objects/Coordinates';
+
+import { DomainEvent } from './DomainEvent';
 
 export class LocationShared extends DomainEvent {
   constructor(

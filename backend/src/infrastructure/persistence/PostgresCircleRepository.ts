@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { prisma } from './PrismaClient';
 import { ICircleRepository } from '../../domain/ports/ICircleRepository';
 import { Circle } from '../../domain/aggregates/circle/Circle';

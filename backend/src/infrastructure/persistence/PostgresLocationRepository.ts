@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { prisma } from './PrismaClient';
 import { ILocationRepository } from '../../domain/ports/ILocationRepository';
 import { LocationUpdate } from '../../domain/entities/LocationUpdate';
