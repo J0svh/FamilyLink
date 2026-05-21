@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { useTranslation } from 'react-i18next';
 import { api } from '../lib/api';
 import { useAuthStore } from '../stores/authStore';
 
@@ -10,7 +9,6 @@ function isValidEmail(email: string): boolean {
 }
 
 export default function LoginPage() {
-  const { t } = useTranslation();
   const navigate = useNavigate();
   const { setTokens, setUser } = useAuthStore();
   const [email, setEmail] = useState('');

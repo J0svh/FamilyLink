@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
@@ -12,12 +12,11 @@ export default function DashboardPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { username, logout } = useAuthStore();
-  const { circles, setCircles, addCircle } = useCircleStore();
+  const { circles, addCircle } = useCircleStore();
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [inviteCircleId, setInviteCircleId] = useState('');
   const [newCircleName, setNewCircleName] = useState('');
-  const [loading, setLoading] = useState(false);
 
   const handleCreateCircle = async (e: React.FormEvent) => {
     e.preventDefault();

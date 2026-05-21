@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { useTranslation } from 'react-i18next';
 import { api } from '../lib/api';
 import { useAuthStore } from '../stores/authStore';
 
@@ -13,7 +12,6 @@ interface Member {
 }
 
 export default function CircleManagementPage() {
-  const { t } = useTranslation();
   const { circleId } = useParams<{ circleId: string }>();
   const navigate = useNavigate();
   const userId = useAuthStore((s) => s.userId);

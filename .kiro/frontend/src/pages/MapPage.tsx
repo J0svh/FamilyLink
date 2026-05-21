@@ -29,7 +29,6 @@ import { ZoneManager } from '../components/ZoneManager';
 import { ZoneLabels } from '../components/ZoneLabels';
 import { ProfileWidget } from '../components/ProfileWidget';
 import { incrementChallenge } from '../components/DailyChallenges';
-import { getAvatarSrc } from '../lib/avatars';
 
 export default function MapPage() {
   const { t } = useTranslation();
@@ -259,7 +258,7 @@ export default function MapPage() {
                 {/* Weather and Battery badges for current user */}
                 {member.userId === userId && (
                   <div className="absolute -top-6 left-1/2 -translate-x-1/2 flex gap-1">
-                    <WeatherBadge />
+                    <WeatherBadge latitude={member.latitude} longitude={member.longitude} />
                     <BatteryIndicator />
                   </div>
                 )}
