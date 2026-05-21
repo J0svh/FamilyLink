@@ -41,7 +41,7 @@ export function ShareBottomSheet({
             <div className="w-10 h-1 bg-border rounded-full mx-auto mb-6" />
 
             <h3 className="text-lg font-semibold text-text-primary mb-1">
-              📍 Compartir mi ubicación
+              Compartir mi ubicación
             </h3>
             <p className="text-sm text-text-secondary mb-5">
               Elige quién podrá ver dónde estás
@@ -53,8 +53,8 @@ export function ShareBottomSheet({
               disabled={loading}
               className="w-full flex items-center gap-4 p-4 bg-background rounded-[14px] border border-border hover:border-accent/30 transition-colors mb-3 disabled:opacity-50"
             >
-              <div className="w-11 h-11 bg-accent/10 rounded-full flex items-center justify-center text-xl">
-                👥
+              <div className="w-11 h-11 bg-accent/10 rounded-full flex items-center justify-center">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-accent"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
               </div>
               <div className="text-left">
                 <p className="font-medium text-text-primary text-sm">Con todo el grupo</p>

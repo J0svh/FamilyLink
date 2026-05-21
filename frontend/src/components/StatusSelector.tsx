@@ -14,10 +14,15 @@ const STATUS_OPTIONS: StatusOption[] = [
   { state: 'walking', emoji: '🚶', label: 'En movimiento', sublabel: 'Caminando o desplazándome' },
   { state: 'sleeping', emoji: '😴', label: 'Descansando', sublabel: 'No molestar' },
   { state: 'working', emoji: '💼', label: 'Trabajando', sublabel: 'Ocupado en el trabajo' },
-  { state: 'gym', emoji: '🏋️', label: 'En el gym', sublabel: 'Haciendo ejercicio' },
-  { state: 'gaming', emoji: '🎮', label: 'Jugando', sublabel: 'Tiempo libre' },
-  { state: 'eating', emoji: '🍽️', label: 'Comiendo', sublabel: 'Hora de comer' },
-  { state: 'studying', emoji: '📚', label: 'Estudiando', sublabel: 'Concentrado' },
+];
+
+// Extended states for future (Phase 2)
+const EXTENDED_STATUS_OPTIONS: StatusOption[] = [
+  ...STATUS_OPTIONS,
+  { state: 'idle' as AvatarState, emoji: '🏋️', label: 'En el gym', sublabel: 'Haciendo ejercicio' },
+  { state: 'idle' as AvatarState, emoji: '🎮', label: 'Jugando', sublabel: 'Tiempo libre' },
+  { state: 'idle' as AvatarState, emoji: '🍽️', label: 'Comiendo', sublabel: 'Hora de comer' },
+  { state: 'idle' as AvatarState, emoji: '📚', label: 'Estudiando', sublabel: 'Concentrado' },
 ];
 
 interface StatusSelectorProps {
@@ -28,6 +33,9 @@ interface StatusSelectorProps {
 }
 
 export function StatusSelector({ currentState, onStateChange, isOpen, onClose }: StatusSelectorProps) {
+  const [useExtended, setUseExtended] = useState(false);
+  const options = useExtended ? EXTENDED_STATUS_OPTIONS : STATUS_OPTIONS;
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -47,15 +55,23 @@ export function StatusSelector({ currentState, onStateChange, isOpen, onClose }:
             transition={{ type: 'spring', damping: 20, stiffness: 300 }}
             className="fixed bottom-24 left-4 right-4 max-w-sm mx-auto bg-surface rounded-[20px] shadow-2xl z-50 p-5"
           >
-            <h3 className="font-semibold text-text-primary mb-4">Mi estado</h3>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-semibold text-text-primary">Mi estado</h3>
+              <button
+                onClick={() => setUseExtended(!useExtended)}
+                className="text-xs text-accent font-medium"
+              >
+                {useExtended ? 'Menos opciones' : 'Más opciones'}
+              </button>
+            </div>
 
             <div className="grid grid-cols-2 gap-2">
-              {STATUS_OPTIONS.map((opt) => (
+              {options.map((opt, i) => (
                 <button
-                  key={opt.state}
+                  key={`${opt.state}-${i}`}
                   onClick={() => { onStateChange(opt.state, opt.label); onClose(); }}
                   className={`flex items-center gap-2.5 p-3 rounded-[12px] border transition-all text-left ${
-                    currentState === opt.state
+                    currentState === opt.state && i < 4
                       ? 'border-accent bg-accent/5'
                       : 'border-border hover:border-accent/30 bg-background'
                   }`}

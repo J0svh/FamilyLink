@@ -7,8 +7,8 @@ import { asyncHandler } from '../middleware/asyncHandler';
 
 const sendMessageSchema = z.object({
   body: z.object({
-    content: z.string().min(1).max(2000),
-    type: z.enum(['text', 'emoji', 'image']).optional(),
+    content: z.string().min(1),
+    type: z.enum(['text', 'emoji', 'image', 'gif', 'photo', 'voice']).optional(),
   }),
   params: z.object({
     circleId: z.string().uuid(),

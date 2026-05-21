@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
-import Map, { Marker, Source, Layer, NavigationControl } from 'react-map-gl/maplibre';
+import Map, { Marker, Source, Layer } from 'react-map-gl/maplibre';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { api } from '../lib/api';
 import { useMapStore } from '../stores/mapStore';
@@ -13,12 +13,30 @@ import { Avatar2D, AvatarState } from '../components/Avatar2D';
 import { ShareBottomSheet } from '../components/ShareBottomSheet';
 import { StatusSelector } from '../components/StatusSelector';
 import { CircleChat } from '../components/CircleChat';
+import { SnapMapStory } from '../components/SnapMapStory';
+import { GhostMode } from '../components/GhostMode';
+import { DailyChallenges } from '../components/DailyChallenges';
+import { ArrivedSafe } from '../components/ArrivedSafe';
+import { WeatherBadge } from '../components/WeatherBadge';
+import { BatteryIndicator } from '../components/BatteryIndicator';
+import { HeatmapLayer } from '../components/HeatmapLayer';
+import { AvatarSelector } from '../components/AvatarSelector';
+import { ToastContainer } from '../components/Toast';
+import { ZoneLayer } from '../components/ZoneLayer';
+import { ZoneCreator } from '../components/ZoneCreator';
+import { ZoneEditor } from '../components/ZoneEditor';
+import { ZoneManager } from '../components/ZoneManager';
+import { ZoneLabels } from '../components/ZoneLabels';
+import { ProfileWidget } from '../components/ProfileWidget';
+import { incrementChallenge } from '../components/DailyChallenges';
+import { getAvatarSrc } from '../lib/avatars';
 
 export default function MapPage() {
   const { t } = useTranslation();
   const { circleId } = useParams<{ circleId: string }>();
   const navigate = useNavigate();
   const userId = useAuthStore((s) => s.userId);
+  const avatarId = useAuthStore((s) => s.avatarId);
   const { style, members, viewState, setStyle, setMembers, setViewState } = useMapStore();
   const [sharing, setSharing] = useState(false);
   const [shareSuccess, setShareSuccess] = useState(false);
@@ -28,13 +46,43 @@ export default function MapPage() {
   const [showStatusSelector, setShowStatusSelector] = useState(false);
   const [showChat, setShowChat] = useState(false);
   const [manualState, setManualState] = useState<AvatarState | null>(null);
-  const [hasSharedWithGroup, setHasSharedWithGroup] = useState(false); // OFF by default for performance
+  const [hasSharedWithGroup, setHasSharedWithGroup] = useState(false);
+  const [showDailyChallenges, setShowDailyChallenges] = useState(false);
+  const [showAvatarSelector, setShowAvatarSelector] = useState(false);
+  const [ghostMode, setGhostMode] = useState(false);
+  const [showHeatmap, setShowHeatmap] = useState(false);
+  const [showZoneCreator, setShowZoneCreator] = useState(false);
+  const [zonePoint, setZonePoint] = useState<{ lat: number; lng: number } | null>(null);
+  const [zoneRefreshKey, setZoneRefreshKey] = useState(0);
+  const [showProfileWidget, setShowProfileWidget] = useState(false);
+  const [editingZone, setEditingZone] = useState<any>(null);
+  const [showZoneManager, setShowZoneManager] = useState(false);
+
+  /**
+   * Generate stories from members data for SnapMapStory
+   */
+  const stories = members
+    .filter(m => m.latitude !== 0 && !m.isPrivacyModeActive)
+    .map(m => ({
+      userId: m.userId,
+      username: m.username,
+      avatarId: 'avatar-04',
+      action: 'compartió ubicación',
+      timeAgo: 'hace ' + Math.floor((Date.now() - new Date(m.capturedAt).getTime()) / 60000) + ' min',
+    }))
+    .filter(s => !s.timeAgo.includes('NaN'));
+
+  /**
+   * Generate heatmap points from member locations
+   */
+  const heatmapPoints = members
+    .filter(m => m.latitude !== 0)
+    .map(m => ({ latitude: m.latitude, longitude: m.longitude, weight: 1 }));
 
   /**
    * Determine avatar state. Manual state takes priority.
    */
   const getAvatarState = useCallback((member: typeof members[0]): AvatarState => {
-    // If this is the current user and they set a manual state, use it
     if (member.userId === userId && manualState) return manualState;
 
     const lastUpdate = new Date(member.capturedAt).getTime();
@@ -51,13 +99,14 @@ export default function MapPage() {
     return 'idle';
   }, [manualState, userId]);
 
-  // Center on user's location on first load + show self as idle
+  // Center on user's location on first load
   useEffect(() => {
     centerOnMe();
   }, []);
 
   const centerOnMe = () => {
     if (!navigator.geolocation) return;
+    incrementChallenge('center');
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         setViewState({
@@ -65,7 +114,6 @@ export default function MapPage() {
           longitude: pos.coords.longitude,
           zoom: 15,
         });
-        // If current user has no location in members list, add them as idle
         const selfInMembers = members.find(m => m.userId === userId);
         if (!selfInMembers || selfInMembers.latitude === 0) {
           const updatedMembers = members.filter(m => m.userId !== userId);
@@ -74,13 +122,13 @@ export default function MapPage() {
             username: useAuthStore.getState().username || 'Tú',
             latitude: pos.coords.latitude,
             longitude: pos.coords.longitude,
-            capturedAt: new Date(0).toISOString(), // old date = idle state
+            capturedAt: new Date(0).toISOString(),
             isPrivacyModeActive: false,
           });
           setMembers(updatedMembers);
         }
       },
-      () => {}, // silently fail
+      () => {},
       { enableHighAccuracy: true },
     );
   };
@@ -120,6 +168,15 @@ export default function MapPage() {
           setShowShareSheet(false);
           setTimeout(() => setShareSuccess(false), 2000);
           loadLocations();
+          incrementChallenge('share');
+
+          // Auto-send chat message
+          try {
+            await api.post(`/chat/circles/${circleId}/messages`, {
+              content: `📍 Ha compartido su ubicación`,
+              type: 'text',
+            });
+          } catch { /* silent */ }
         } catch (err) {
           console.error('Failed to share location', err);
         } finally {
@@ -133,15 +190,22 @@ export default function MapPage() {
 
   return (
     <div className="h-screen w-screen relative">
+      {/* Toast notifications */}
+      <ToastContainer />
+
       {/* Map */}
       <Map
         {...viewState}
         onMove={(evt) => setViewState(evt.viewState)}
+        onClick={(evt) => {
+          if (showZoneCreator && evt.lngLat) {
+            setZonePoint({ lat: evt.lngLat.lat, lng: evt.lngLat.lng });
+          }
+        }}
         style={{ width: '100%', height: '100%' }}
         mapStyle={getMapStyle(style)}
+        cursor={showZoneCreator ? 'crosshair' : 'grab'}
       >
-        <NavigationControl position="top-right" />
-
         {/* 3D Buildings layer — only when enabled and zoomed in */}
         {show3DBuildings && viewState.zoom >= 15 && (
           <Source
@@ -164,6 +228,9 @@ export default function MapPage() {
           </Source>
         )}
 
+        {/* Heatmap layer */}
+        <HeatmapLayer points={heatmapPoints} visible={showHeatmap} />
+
         {/* Member avatars */}
         {members
           .filter((m) => !m.isPrivacyModeActive && m.latitude !== 0)
@@ -174,13 +241,28 @@ export default function MapPage() {
               longitude={member.longitude}
               anchor="bottom"
             >
-              <div className="relative">
+              <div
+                className="relative cursor-pointer"
+                onClick={() => {
+                  if (member.userId === userId) {
+                    setShowProfileWidget(true);
+                  }
+                }}
+              >
                 <Avatar2D
                   username={member.username}
+                  avatarId={member.userId === userId ? avatarId : null}
                   state={getAvatarState(member)}
                   isCurrentUser={member.userId === userId}
                   size="md"
                 />
+                {/* Weather and Battery badges for current user */}
+                {member.userId === userId && (
+                  <div className="absolute -top-6 left-1/2 -translate-x-1/2 flex gap-1">
+                    <WeatherBadge />
+                    <BatteryIndicator />
+                  </div>
+                )}
                 {/* "Solo tú" badge — only for current user when not shared */}
                 {member.userId === userId && !hasSharedWithGroup && (
                   <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 whitespace-nowrap">
@@ -193,80 +275,161 @@ export default function MapPage() {
             </Marker>
           ))}
 
-        {/* Zone polygons - TODO: load from API */}
+        {/* Zone polygons with 2D flat style */}
+        <ZoneLayer circleId={circleId || ''} key={zoneRefreshKey} onZoneClick={(zone) => setEditingZone(zone)} />
+        {/* Zone name labels (GTA-style) */}
+        <ZoneLabels circleId={circleId || ''} key={`labels-${zoneRefreshKey}`} />
       </Map>
 
-      {/* Top bar */}
-      <div className="absolute top-4 left-4 right-4 flex items-center justify-between pointer-events-none">
-        {/* Back button */}
+      {/* Top left — Back button + SnapMapStory */}
+      <div className="absolute top-4 left-4 flex flex-col gap-3">
         <button
           onClick={() => navigate('/dashboard')}
-          className="pointer-events-auto bg-surface/90 backdrop-blur-sm rounded-full px-4 py-2 shadow-md text-sm font-medium text-text-primary"
+          className="pointer-events-auto bg-surface/90 backdrop-blur-md rounded-[14px] px-4 py-2.5 shadow-lg text-sm font-medium text-text-primary hover:bg-surface transition-all border border-border/50"
         >
-          ← Volver
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="inline mr-1.5 -mt-0.5">
+            <path d="M19 12H5M12 19l-7-7 7-7" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+          Volver
         </button>
 
-        {/* Style selector */}
-        <div className="pointer-events-auto flex gap-1 bg-surface/90 backdrop-blur-sm rounded-full p-1 shadow-md">
+        {/* SnapMapStory — recent activity */}
+        <SnapMapStory stories={stories} />
+      </div>
+
+      {/* Center — Map style selector */}
+      <div className="absolute top-4 left-1/2 -translate-x-1/2">
+        <div className="flex gap-1 bg-surface/90 backdrop-blur-md rounded-[14px] p-1.5 shadow-lg border border-border/50">
           {(['streets', 'dark', 'satellite', 'toner'] as MapStyleKey[]).map((s) => (
             <button
               key={s}
-              onClick={() => setStyle(s)}
-              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+              onClick={() => { setStyle(s); if (s === 'dark') incrementChallenge('darkmap'); }}
+              className={`px-3 py-1.5 rounded-[10px] text-xs font-medium transition-all ${
                 style === s
-                  ? 'bg-accent text-white'
-                  : 'text-text-secondary hover:text-text-primary'
+                  ? 'bg-accent text-white shadow-sm'
+                  : 'text-text-secondary hover:text-text-primary hover:bg-background'
               }`}
             >
-              {s === 'toner' ? 'Toner' : t(`map.styles.${s}`)}
+              {s === 'streets' ? '🗺️' : s === 'dark' ? '🌙' : s === 'satellite' ? '🛰️' : '✒️'}
+              <span className="ml-1 hidden sm:inline">{s === 'toner' ? 'Toner' : t(`map.styles.${s}`)}</span>
             </button>
           ))}
         </div>
       </div>
 
-      {/* Center on me button */}
-      <div className="absolute top-16 right-4 flex flex-col gap-2">
+      {/* Right side — Zoom controls + center + 3D + Ghost + Heatmap */}
+      <div className="absolute right-4 top-1/2 -translate-y-1/2 flex flex-col gap-2">
+        <button
+          onClick={() => setViewState({ zoom: (viewState.zoom || 13) + 1 })}
+          className="bg-surface/90 backdrop-blur-md rounded-[12px] w-10 h-10 shadow-lg flex items-center justify-center hover:bg-surface transition-all border border-border/50"
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+        </button>
+        <button
+          onClick={() => setViewState({ zoom: (viewState.zoom || 13) - 1 })}
+          className="bg-surface/90 backdrop-blur-md rounded-[12px] w-10 h-10 shadow-lg flex items-center justify-center hover:bg-surface transition-all border border-border/50"
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+            <line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+        </button>
+        <div className="h-px bg-border/50 mx-2" />
         <button
           onClick={centerOnMe}
-          className="bg-surface/90 backdrop-blur-sm rounded-full w-10 h-10 shadow-md flex items-center justify-center text-accent hover:bg-surface transition-colors"
+          className="bg-surface/90 backdrop-blur-md rounded-[12px] w-10 h-10 shadow-lg flex items-center justify-center text-accent hover:bg-surface transition-all border border-border/50"
           title="Centrar en mi ubicación"
         >
-          ◎
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+            <circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/>
+          </svg>
         </button>
         <button
           onClick={() => setShow3DBuildings(!show3DBuildings)}
-          className={`bg-surface/90 backdrop-blur-sm rounded-full w-10 h-10 shadow-md flex items-center justify-center transition-colors ${show3DBuildings ? 'text-accent' : 'text-text-secondary'}`}
+          className={`bg-surface/90 backdrop-blur-md rounded-[12px] w-10 h-10 shadow-lg flex items-center justify-center transition-all border border-border/50 ${show3DBuildings ? 'text-accent' : 'text-text-secondary'}`}
           title="Edificios 3D"
         >
-          🏢
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/>
+          </svg>
+        </button>
+
+        {/* Ghost Mode toggle */}
+        <GhostMode isActive={ghostMode} onToggle={(active) => { setGhostMode(active); if (active) incrementChallenge('ghost'); }} />
+
+        {/* Heatmap toggle */}
+        <button
+          onClick={() => { setShowHeatmap(!showHeatmap); if (!showHeatmap) incrementChallenge('heatmap'); }}
+          className={`bg-surface/90 backdrop-blur-md rounded-[12px] w-10 h-10 shadow-lg flex items-center justify-center transition-all border border-border/50 ${showHeatmap ? 'text-accent' : 'text-text-secondary'}`}
+          title="Mapa de calor"
+        >
+          🔥
         </button>
       </div>
 
       {/* Bottom action bar */}
-      <div className="absolute bottom-8 left-4 right-4 flex justify-center items-center gap-3">
+      <div className="absolute bottom-6 left-4 right-4 flex justify-center items-center gap-3">
         {/* Status button */}
         <motion.button
-          whileTap={{ scale: 0.95 }}
+          whileTap={{ scale: 0.9 }}
           onClick={() => setShowStatusSelector(true)}
-          className="px-4 py-4 bg-surface/90 backdrop-blur-sm rounded-full shadow-lg border border-border"
+          className="w-12 h-12 bg-surface/90 backdrop-blur-md rounded-[14px] shadow-lg border border-border/50 flex items-center justify-center"
         >
-          <span className="text-lg">
+          <span className="text-xl">
             {manualState === 'walking' ? '🚶' : manualState === 'sleeping' ? '😴' : manualState === 'working' ? '💼' : '🧍'}
           </span>
         </motion.button>
+
+        {/* ArrivedSafe button */}
+        <ArrivedSafe circleId={circleId || ''} />
 
         {/* Share location button */}
         <motion.button
           whileTap={{ scale: 0.95 }}
           onClick={() => setShowShareSheet(true)}
           disabled={sharing}
-          className={`px-8 py-4 rounded-full font-medium shadow-lg transition-all ${
+          className={`px-6 py-3.5 rounded-[14px] font-medium shadow-lg transition-all ${
             shareSuccess
               ? 'bg-success text-white'
               : 'bg-accent hover:bg-accent-hover text-white'
           } disabled:opacity-50`}
         >
-          {shareSuccess ? '✓ ' + t('map.shared') : sharing ? '...' : t('map.shareLocation')}
+          {shareSuccess ? '✓ Compartida' : sharing ? '...' : 'Compartir ubicación'}
+        </motion.button>
+
+        {/* Create Zone button — opens zone manager */}
+        <motion.button
+          whileTap={{ scale: 0.95 }}
+          onClick={() => showZoneCreator ? setShowZoneCreator(false) : setShowZoneManager(true)}
+          className={`px-5 py-3.5 rounded-[14px] font-medium shadow-lg transition-all ${
+            showZoneCreator
+              ? 'bg-success text-white'
+              : 'bg-surface/90 backdrop-blur-md border border-border/50 text-text-primary'
+          }`}
+        >
+          {showZoneCreator ? 'Cancelar' : 'Zonas'}
+        </motion.button>
+
+        {/* Daily Challenges button */}
+        <motion.button
+          whileTap={{ scale: 0.9 }}
+          onClick={() => setShowDailyChallenges(true)}
+          className="w-12 h-12 bg-surface/90 backdrop-blur-md rounded-[14px] shadow-lg border border-border/50 flex items-center justify-center"
+          title="Desafíos diarios"
+        >
+          <span className="text-xl">🎯</span>
+        </motion.button>
+
+        {/* Chat button */}
+        <motion.button
+          whileTap={{ scale: 0.9 }}
+          onClick={() => setShowChat(true)}
+          className="w-12 h-12 bg-surface/90 backdrop-blur-md rounded-[14px] shadow-lg border border-border/50 flex items-center justify-center"
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-accent">
+            <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
         </motion.button>
       </div>
 
@@ -287,22 +450,65 @@ export default function MapPage() {
         onClose={() => setShowStatusSelector(false)}
       />
 
-      {/* Chat button */}
-      <div className="absolute top-4 right-16 pointer-events-auto">
-        <button
-          onClick={() => setShowChat(true)}
-          className="bg-surface/90 backdrop-blur-sm rounded-full w-10 h-10 shadow-md flex items-center justify-center text-lg hover:bg-surface transition-colors"
-          title="Chat del círculo"
-        >
-          💬
-        </button>
-      </div>
-
       {/* Circle Chat */}
       <CircleChat
         circleId={circleId || ''}
         isOpen={showChat}
         onClose={() => setShowChat(false)}
+      />
+
+      {/* Daily Challenges */}
+      <DailyChallenges
+        isOpen={showDailyChallenges}
+        onClose={() => setShowDailyChallenges(false)}
+      />
+
+      {/* Avatar Selector */}
+      <AvatarSelector
+        isOpen={showAvatarSelector}
+        onClose={() => setShowAvatarSelector(false)}
+        currentAvatarId={avatarId || 'avatar-17'}
+        onAvatarChange={(id) => {
+          useAuthStore.getState().setAvatarId(id);
+        }}
+        mapStyle={style}
+      />
+
+      {/* Profile Widget */}
+      <ProfileWidget
+        isOpen={showProfileWidget}
+        onClose={() => setShowProfileWidget(false)}
+        username={useAuthStore.getState().username || ''}
+        avatarId={avatarId}
+        isCurrentUser={true}
+        status={manualState ? (manualState === 'walking' ? '🚶 En movimiento' : manualState === 'sleeping' ? '😴 Descansando' : manualState === 'working' ? '💼 Trabajando' : '') : ''}
+      />
+
+      {/* Zone Manager */}
+      <ZoneManager
+        circleId={circleId || ''}
+        isOpen={showZoneManager}
+        onClose={() => setShowZoneManager(false)}
+        onCreateZone={() => { setShowZoneManager(false); setShowZoneCreator(true); }}
+        onZoneUpdated={() => setZoneRefreshKey(k => k + 1)}
+      />
+
+      {/* Zone Editor */}
+      <ZoneEditor
+        zone={editingZone}
+        circleId={circleId || ''}
+        isOpen={!!editingZone}
+        onClose={() => setEditingZone(null)}
+        onUpdated={() => setZoneRefreshKey(k => k + 1)}
+      />
+
+      {/* Zone Creator */}
+      <ZoneCreator
+        circleId={circleId || ''}
+        isOpen={showZoneCreator}
+        onClose={() => { setShowZoneCreator(false); setZonePoint(null); }}
+        selectedPoint={zonePoint}
+        onZoneCreated={() => { setZoneRefreshKey(k => k + 1); incrementChallenge('zone'); }}
       />
 
       {/* Loading overlay */}

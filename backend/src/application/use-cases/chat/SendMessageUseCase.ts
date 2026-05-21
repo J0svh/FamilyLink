@@ -8,7 +8,7 @@ export interface SendMessageInputDTO {
   circleId: string;
   userId: string;
   content: string;
-  type?: 'text' | 'emoji' | 'image';
+  type?: 'text' | 'emoji' | 'image' | 'gif' | 'photo' | 'voice';
   attachmentUrl?: string;
 }
 
@@ -39,7 +39,9 @@ export class SendMessageUseCase {
     if (!dto.content || dto.content.trim().length === 0) {
       throw AppError.badRequest('Message content is required');
     }
-    if (dto.content.length > 2000) {
+    // Only enforce length limit for text messages (images/voice are base64)
+    const isMediaType = ['image', 'gif', 'photo', 'voice'].includes(dto.type || '');
+    if (!isMediaType && dto.content.length > 2000) {
       throw AppError.badRequest('Message too long (max 2000 characters)');
     }
 
