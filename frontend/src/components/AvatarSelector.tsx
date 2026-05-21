@@ -2,8 +2,6 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AVATARS, AvatarOption } from '../lib/avatars';
 import { showToast } from './Toast';
-import { api } from '../lib/api';
-import { useAuthStore } from '../stores/authStore';
 
 interface AvatarSelectorProps {
   isOpen: boolean;

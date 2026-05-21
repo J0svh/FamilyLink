@@ -1,8 +1,5 @@
 import { useState, useEffect } from 'react';
 
-// OpenWeatherMap free tier: 1000 calls/day
-const OWM_KEY = ''; // User adds their free key in .env as VITE_OPENWEATHER_KEY
-
 interface WeatherData {
   temp: number;
   icon: string;

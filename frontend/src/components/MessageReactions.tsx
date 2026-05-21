@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { api } from '../lib/api';
 import { haptics } from '../lib/haptics';
 
 const REACTION_EMOJIS = ['❤️', '😂', '👍', '😮', '😢', '🔥'];

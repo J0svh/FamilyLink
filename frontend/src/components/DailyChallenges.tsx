@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getDailyChallenges, claimChallenge, addMedal } from '../lib/challenges';
 import { AchievementPopup } from './AchievementPopup';
-import { ACHIEVEMENTS } from '../lib/achievements';
 
 // Re-export for backward compatibility
 export { incrementChallenge } from '../lib/challenges';
