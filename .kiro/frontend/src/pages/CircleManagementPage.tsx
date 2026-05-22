@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { api } from '../lib/api';
 import { useAuthStore } from '../stores/authStore';
+import { OnboardingTutorial, CIRCLE_MANAGEMENT_ONBOARDING_STEPS } from '../components/OnboardingTutorial';
 
 interface Member {
   userId: string;
@@ -65,6 +66,10 @@ export default function CircleManagementPage() {
 
   return (
     <div className="min-h-screen bg-background">
+      <OnboardingTutorial
+        steps={CIRCLE_MANAGEMENT_ONBOARDING_STEPS}
+        storageKey="familylink-onboarding-circle-manage-done"
+      />
       {/* Header */}
       <header className="bg-surface border-b border-border px-6 py-4">
         <div className="max-w-2xl mx-auto flex items-center justify-between">

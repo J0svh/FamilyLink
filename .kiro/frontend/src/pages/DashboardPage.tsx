@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
@@ -7,16 +7,36 @@ import { useAuthStore } from '../stores/authStore';
 import { useCircleStore } from '../stores/circleStore';
 import { InviteModal } from '../components/InviteModal';
 import { ToastContainer } from '../components/Toast';
+import { OnboardingTutorial, DASHBOARD_ONBOARDING_STEPS } from '../components/OnboardingTutorial';
 
 export default function DashboardPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { username, logout } = useAuthStore();
-  const { circles, addCircle } = useCircleStore();
+  const { circles, addCircle, setCircles } = useCircleStore();
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [inviteCircleId, setInviteCircleId] = useState('');
   const [newCircleName, setNewCircleName] = useState('');
+  const [loadingCircles, setLoadingCircles] = useState(true);
+
+  // Load circles from backend on mount
+  useEffect(() => {
+    const loadCircles = async () => {
+      try {
+        const { data } = await api.get('/circles');
+        if (data && Array.isArray(data)) {
+          setCircles(data);
+        }
+      } catch (err) {
+        console.error('Failed to load circles from backend', err);
+        // Keep local store circles as fallback
+      } finally {
+        setLoadingCircles(false);
+      }
+    };
+    loadCircles();
+  }, [setCircles]);
 
   const handleCreateCircle = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,6 +65,7 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0f0c29] via-[#302b63] to-[#24243e]">
       <ToastContainer />
+      <OnboardingTutorial steps={DASHBOARD_ONBOARDING_STEPS} storageKey="familylink-onboarding-dashboard-done" />
 
       {/* Header */}
       <header className="px-6 py-5">

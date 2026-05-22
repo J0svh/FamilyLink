@@ -29,6 +29,7 @@ import { ZoneManager } from '../components/ZoneManager';
 import { ZoneLabels } from '../components/ZoneLabels';
 import { ProfileWidget } from '../components/ProfileWidget';
 import { incrementChallenge } from '../components/DailyChallenges';
+import { OnboardingTutorial, MAP_ONBOARDING_STEPS } from '../components/OnboardingTutorial';
 
 export default function MapPage() {
   const { t } = useTranslation();
@@ -191,6 +192,9 @@ export default function MapPage() {
     <div className="h-screen w-screen relative">
       {/* Toast notifications */}
       <ToastContainer />
+
+      {/* Onboarding tutorial for first-time users */}
+      <OnboardingTutorial steps={MAP_ONBOARDING_STEPS} storageKey="familylink-onboarding-map-done" />
 
       {/* Map */}
       <Map

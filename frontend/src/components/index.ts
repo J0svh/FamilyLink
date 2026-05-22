@@ -31,5 +31,6 @@ export { ZoneCreator } from './ZoneCreator';
 export { ZoneEditor } from './ZoneEditor';
 export { ZoneManager } from './ZoneManager';
 export type { ZoneData } from './ZoneLayer';
+export { OnboardingTutorial, MAP_ONBOARDING_STEPS, DASHBOARD_ONBOARDING_STEPS, PROFILE_ONBOARDING_STEPS, CIRCLE_MANAGEMENT_ONBOARDING_STEPS } from './OnboardingTutorial';
 export type { AvatarState } from './Avatar2D';
 export type { ToastType } from './Toast';

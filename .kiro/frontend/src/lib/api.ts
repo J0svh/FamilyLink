@@ -1,9 +1,17 @@
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import { useAuthStore } from '../stores/authStore';
+
+const MAX_RETRIES = 3;
+const RETRY_DELAY_MS = 2000;
+
+function sleep(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || '/api/v1',
   headers: { 'Content-Type': 'application/json' },
+  timeout: 15000,
 });
 
 // Request interceptor: add JWT
@@ -15,12 +23,23 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Response interceptor: auto-refresh on 401
+// Response interceptor: auto-refresh on 401 + retry on network errors (Render cold start)
 api.interceptors.response.use(
   (response) => response,
-  async (error) => {
-    const originalRequest = error.config;
+  async (error: AxiosError) => {
+    const originalRequest = error.config as any;
 
+    // Retry logic for network errors or 502/503/504 (Render sleeping)
+    const isNetworkError = !error.response || [502, 503, 504].includes(error.response.status);
+    const retryCount = originalRequest._retryCount || 0;
+
+    if (isNetworkError && retryCount < MAX_RETRIES && !originalRequest._noRetry) {
+      originalRequest._retryCount = retryCount + 1;
+      await sleep(RETRY_DELAY_MS * originalRequest._retryCount);
+      return api(originalRequest);
+    }
+
+    // Auto-refresh on 401
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
 
@@ -32,7 +51,10 @@ api.interceptors.response.use(
       }
 
       try {
-        const { data } = await axios.post('/api/v1/auth/refresh', { refreshToken });
+        const { data } = await axios.post(
+          `${import.meta.env.VITE_API_URL || '/api/v1'}/auth/refresh`,
+          { refreshToken },
+        );
         useAuthStore.getState().setTokens(data.accessToken, data.refreshToken);
         originalRequest.headers.Authorization = `Bearer ${data.accessToken}`;
         return api(originalRequest);

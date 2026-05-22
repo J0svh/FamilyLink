@@ -6,6 +6,7 @@ import { getAvatarSrc } from '../lib/avatars';
 import { ACHIEVEMENTS, RARITY_COLORS } from '../lib/achievements';
 import { AvatarSelector } from '../components/AvatarSelector';
 import { ToastContainer, showToast } from '../components/Toast';
+import { OnboardingTutorial, PROFILE_ONBOARDING_STEPS } from '../components/OnboardingTutorial';
 
 export default function ProfilePage() {
   const navigate = useNavigate();
@@ -23,6 +24,10 @@ export default function ProfilePage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0f0c29] via-[#302b63] to-[#24243e]">
       <ToastContainer />
+      <OnboardingTutorial
+        steps={PROFILE_ONBOARDING_STEPS}
+        storageKey="familylink-onboarding-profile-done"
+      />
 
       {/* Header */}
       <div className="px-6 py-4">
