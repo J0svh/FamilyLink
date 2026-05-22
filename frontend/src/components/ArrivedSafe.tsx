@@ -58,13 +58,13 @@ export function ArrivedSafe({ circleId }: ArrivedSafeProps) {
       whileTap={{ scale: 0.9 }}
       onClick={handleSend}
       disabled={sending || sent}
-      className={`px-4 py-2.5 rounded-[12px] font-medium text-sm shadow-md transition-all ${
+      className={`px-2.5 sm:px-4 py-2 sm:py-2.5 rounded-[10px] sm:rounded-[12px] font-medium text-xs sm:text-sm shadow-md transition-all ${
         sent
           ? 'bg-success text-white'
           : 'bg-surface border border-border text-text-primary hover:border-accent/30'
       } disabled:opacity-60`}
     >
-      {sent ? '✓ Enviado' : sending ? '...' : '🏠 Llegué bien'}
+      {sent ? '✓ Enviado' : sending ? '...' : '🏠 Llegué'}
     </motion.button>
   );
 }

@@ -29,7 +29,7 @@ export function GhostMode({ isActive, onToggle }: GhostModeProps) {
     <>
       <button
         onClick={handleToggle}
-        className={`w-10 h-10 rounded-[12px] flex items-center justify-center transition-all shadow-md border ${
+        className={`w-9 h-9 sm:w-10 sm:h-10 rounded-[10px] sm:rounded-[12px] flex items-center justify-center transition-all shadow-md border ${
           isActive
             ? 'bg-purple-500/90 border-purple-400/50 text-white'
             : 'bg-surface/90 backdrop-blur-md border-border/50 text-text-secondary'

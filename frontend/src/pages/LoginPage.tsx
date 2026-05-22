@@ -82,7 +82,7 @@ export default function LoginPage() {
               <input
                 type="email"
                 value={email}
-                onChange={(e) => { setEmail(e.target.value); setFieldErrors(f => ({ ...f, email: undefined })); }}
+                onChange={(e) => setEmail(e.target.value)}
                 className={`w-full px-4 py-3.5 bg-surface border rounded-[14px] text-text-primary placeholder-text-secondary/40 focus:outline-none focus:ring-2 focus:ring-accent/30 transition-all ${fieldErrors.email ? 'border-error' : 'border-border focus:border-accent'}`}
                 placeholder="tu@email.com"
               />
@@ -95,7 +95,7 @@ export default function LoginPage() {
               <input
                 type="password"
                 value={password}
-                onChange={(e) => { setPassword(e.target.value); setFieldErrors(f => ({ ...f, password: undefined })); }}
+                onChange={(e) => setPassword(e.target.value)}
                 className={`w-full px-4 py-3.5 bg-surface border rounded-[14px] text-text-primary placeholder-text-secondary/40 focus:outline-none focus:ring-2 focus:ring-accent/30 transition-all ${fieldErrors.password ? 'border-error' : 'border-border focus:border-accent'}`}
                 placeholder="••••••••"
               />
