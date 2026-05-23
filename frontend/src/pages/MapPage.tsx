@@ -60,13 +60,22 @@ export default function MapPage() {
 
   /**
    * Generate stories from members data for SnapMapStory
+   * Only show members who have actually shared their location (not epoch date)
    */
   const stories = members
-    .filter(m => m.latitude !== 0 && !m.isPrivacyModeActive)
+    .filter(m => {
+      if (m.latitude === 0 || m.isPrivacyModeActive) return false;
+      // Filter out members who never shared (capturedAt is epoch or very old)
+      const capturedTime = new Date(m.capturedAt).getTime();
+      if (capturedTime < 86400000) return false; // epoch = never shared
+      const hoursSince = (Date.now() - capturedTime) / 3600000;
+      if (hoursSince > 168) return false; // older than 7 days
+      return true;
+    })
     .map(m => {
       const minutesAgo = Math.floor((Date.now() - new Date(m.capturedAt).getTime()) / 60000);
       let timeAgo = '';
-      if (minutesAgo < 1) timeAgo = 'hace un momento';
+      if (minutesAgo < 1) timeAgo = 'ahora';
       else if (minutesAgo < 60) timeAgo = `hace ${minutesAgo} min`;
       else if (minutesAgo < 1440) timeAgo = `hace ${Math.floor(minutesAgo / 60)}h`;
       else timeAgo = `hace ${Math.floor(minutesAgo / 1440)}d`;
@@ -74,16 +83,10 @@ export default function MapPage() {
       return {
         userId: m.userId,
         username: m.username,
-        avatarId: m.userId === userId ? (avatarId || 'avatar-17') : 'avatar-04',
+        avatarId: m.userId === userId ? (avatarId || 'avatar-17') : null,
         action: 'compartió ubicación',
         timeAgo,
       };
-    })
-    .filter(s => {
-      // Filter out entries older than 7 days or with invalid dates
-      const match = s.timeAgo.match(/hace (\d+)d/);
-      if (match && parseInt(match[1]) > 7) return false;
-      return !s.timeAgo.includes('NaN');
     });
 
   /**
