@@ -91,9 +91,22 @@ export function ZoneCreator({ circleId, isOpen, onClose, selectedPoint, onZoneCr
           <div className="w-10 h-1 bg-border rounded-full mx-auto mb-4" />
 
           <h3 className="font-semibold text-text-primary text-lg mb-1">Crear zona</h3>
-          <p className="text-xs text-text-secondary mb-4">
-            {selectedPoint ? `📍 ${selectedPoint.lat.toFixed(4)}, ${selectedPoint.lng.toFixed(4)}` : 'Toca un punto en el mapa para colocar la zona'}
-          </p>
+
+          {/* Instruction banner */}
+          {!selectedPoint ? (
+            <div className="bg-accent/10 border border-accent/20 rounded-[12px] px-4 py-3 mb-4">
+              <p className="text-sm text-accent font-medium text-center">
+                👆 Toca un punto en el mapa para colocar la zona
+              </p>
+              <p className="text-[11px] text-accent/70 text-center mt-1">
+                Pulsa donde quieras que esté el centro de la zona
+              </p>
+            </div>
+          ) : (
+            <p className="text-xs text-success mb-4">
+              ✓ Punto seleccionado: {selectedPoint.lat.toFixed(4)}, {selectedPoint.lng.toFixed(4)}
+            </p>
+          )}
 
           {/* Name */}
           <input

@@ -12,26 +12,35 @@ interface OnboardingTutorialProps {
   storageKey: string;
 }
 
+const THREE_WEEKS_MS = 21 * 24 * 60 * 60 * 1000;
+
 export function OnboardingTutorial({ steps, storageKey }: OnboardingTutorialProps) {
   const [currentStep, setCurrentStep] = useState(0);
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    const done = localStorage.getItem(storageKey);
-    if (!done) setVisible(true);
+    const lastShown = localStorage.getItem(storageKey);
+    if (!lastShown) {
+      setVisible(true);
+    } else {
+      const timestamp = parseInt(lastShown, 10);
+      if (!isNaN(timestamp) && Date.now() - timestamp > THREE_WEEKS_MS) {
+        setVisible(true);
+      }
+    }
   }, [storageKey]);
 
   const handleNext = () => {
     if (currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1);
     } else {
-      localStorage.setItem(storageKey, 'true');
+      localStorage.setItem(storageKey, Date.now().toString());
       setVisible(false);
     }
   };
 
   const handleSkip = () => {
-    localStorage.setItem(storageKey, 'true');
+    localStorage.setItem(storageKey, Date.now().toString());
     setVisible(false);
   };
 
@@ -97,7 +106,7 @@ export function OnboardingTutorial({ steps, storageKey }: OnboardingTutorialProp
               onClick={handleNext}
               className="flex-1 py-3 bg-accent hover:bg-accent-hover text-white font-semibold rounded-[12px] transition-colors"
             >
-              {isLast ? '¡Entendido!' : 'Siguiente'}
+              {isLast ? 'Entendido' : 'Siguiente'}
             </button>
           </div>
         </motion.div>
@@ -108,13 +117,13 @@ export function OnboardingTutorial({ steps, storageKey }: OnboardingTutorialProp
 
 // Predefined step sets
 export const MAP_ONBOARDING_STEPS: OnboardingStep[] = [
-  { emoji: '👋', title: '¡Bienvenido a FamilyLink!', description: 'Este es tu mapa. Aquí verás la ubicación de tu familia y amigos cuando la compartan contigo.' },
-  { emoji: '📍', title: 'Compartir ubicación', description: 'Pulsa "Compartir ubicación" para que tu familia/amigos vean dónde estás. Solo se comparte cuando TÚ decides.' },
-  { emoji: '🗺️', title: 'Zonas', description: 'Crea zonas como "Casa" o "Trabajo". Pulsa "Zonas" para gestionar tus zonas o crear nuevas.' },
+  { emoji: '👋', title: 'Bienvenido a FamilyLink', description: 'Este es tu mapa. Aquí verás la ubicación de tu familia y amigos cuando la compartan contigo.' },
+  { emoji: '📍', title: 'Compartir ubicación', description: 'Pulsa "Compartir" para que tu familia/amigos vean dónde estás. Solo se comparte cuando TÚ decides.' },
+  { emoji: '🗺️', title: 'Zonas', description: 'Crea zonas como "Casa" o "Trabajo". Pulsa "Zonas", luego toca un punto en el mapa para colocarla.' },
   { emoji: '💬', title: 'Chat del grupo', description: 'Habla con tu grupo pulsando el icono de chat. Puedes enviar emojis, GIFs, fotos y notas de voz.' },
-  { emoji: '🎨', title: 'Estilos de mapa', description: 'Cambia el aspecto del mapa arriba: callejero, nocturno, satélite o toner. ¡Pruébalos!' },
-  { emoji: '🎯', title: 'Retos diarios', description: 'Completa retos para ganar medallas. Pulsa el icono 🎯 para ver los retos de hoy.' },
-  { emoji: '🚀', title: '¡Listo para empezar!', description: 'Ya conoces lo básico. Explora, comparte y diviértete con tu familia y amigos.' },
+  { emoji: '🎨', title: 'Estilos de mapa', description: 'Desliza la barra superior para cambiar el estilo: callejero, nocturno, satélite o toner.' },
+  { emoji: '🎯', title: 'Retos diarios', description: 'Completa retos para ganar medallas. Pulsa el icono de diana para ver los retos de hoy.' },
+  { emoji: '🚀', title: 'Listo para empezar', description: 'Ya conoces lo básico. Explora, comparte y diviértete con tu familia y amigos.' },
 ];
 
 export const DASHBOARD_ONBOARDING_STEPS: OnboardingStep[] = [
@@ -123,7 +132,6 @@ export const DASHBOARD_ONBOARDING_STEPS: OnboardingStep[] = [
   { emoji: '👥', title: 'Invitar personas', description: 'Pasa el ratón sobre un círculo y pulsa el icono de persona+ para invitar a alguien por email o nombre.' },
   { emoji: '🗺️', title: 'Entrar al mapa', description: 'Pulsa en un círculo para abrir el mapa y ver las ubicaciones de tu grupo.' },
 ];
-
 
 export const PROFILE_ONBOARDING_STEPS: OnboardingStep[] = [
   { emoji: '👤', title: 'Tu perfil', description: 'Aquí puedes ver y editar tu información personal, avatar y apodo.' },

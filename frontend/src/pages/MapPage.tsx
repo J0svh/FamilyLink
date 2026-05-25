@@ -390,71 +390,74 @@ export default function MapPage() {
         </button>
       </div>
 
-      {/* Bottom action bar */}
-      <div className="absolute bottom-4 left-2 right-2 sm:bottom-6 sm:left-4 sm:right-4 flex justify-center items-center gap-1.5 sm:gap-3 flex-wrap">
-        {/* Status button */}
-        <motion.button
-          whileTap={{ scale: 0.9 }}
-          onClick={() => setShowStatusSelector(true)}
-          className="w-10 h-10 sm:w-12 sm:h-12 bg-surface/90 backdrop-blur-md rounded-[12px] sm:rounded-[14px] shadow-lg border border-border/50 flex items-center justify-center flex-shrink-0"
-        >
-          <span className="text-lg sm:text-xl">
-            {manualState === 'walking' ? '🚶' : manualState === 'sleeping' ? '😴' : manualState === 'working' ? '💼' : '🧍'}
-          </span>
-        </motion.button>
+      {/* Bottom action bar — horizontal scroll carousel */}
+      <div className="absolute bottom-3 left-0 right-0 sm:bottom-6 sm:left-4 sm:right-4">
+        <div className="flex items-center gap-2 sm:gap-3 overflow-x-auto scrollbar-hide px-3 sm:px-0 pb-1 sm:justify-center">
+          {/* Status button */}
+          <motion.button
+            whileTap={{ scale: 0.9 }}
+            onClick={() => setShowStatusSelector(true)}
+            className="w-10 h-10 sm:w-12 sm:h-12 bg-surface/90 backdrop-blur-md rounded-[12px] sm:rounded-[14px] shadow-lg border border-border/50 flex items-center justify-center flex-shrink-0"
+          >
+            <span className="text-lg sm:text-xl">
+              {manualState === 'walking' ? '🚶' : manualState === 'sleeping' ? '😴' : manualState === 'working' ? '💼' : '🧍'}
+            </span>
+          </motion.button>
 
-        {/* ArrivedSafe button */}
-        <ArrivedSafe circleId={circleId || ''} />
+          {/* ArrivedSafe button */}
+          <div className="flex-shrink-0">
+            <ArrivedSafe circleId={circleId || ''} />
+          </div>
 
-        {/* Share location button */}
-        <motion.button
-          whileTap={{ scale: 0.95 }}
-          onClick={() => setShowShareSheet(true)}
-          disabled={sharing}
-          className={`px-3 sm:px-6 py-2.5 sm:py-3.5 rounded-[12px] sm:rounded-[14px] font-medium text-sm sm:text-base shadow-lg transition-all ${
-            shareSuccess
-              ? 'bg-success text-white'
-              : 'bg-accent hover:bg-accent-hover text-white'
-          } disabled:opacity-50`}
-        >
-          {shareSuccess ? '✓ Compartida' : sharing ? '...' : 'Compartir'}
-        </motion.button>
+          {/* Share location button */}
+          <motion.button
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setShowShareSheet(true)}
+            disabled={sharing}
+            className={`px-4 sm:px-6 py-2.5 sm:py-3.5 rounded-[12px] sm:rounded-[14px] font-medium text-sm shadow-lg transition-all flex-shrink-0 ${
+              shareSuccess
+                ? 'bg-success text-white'
+                : 'bg-accent hover:bg-accent-hover text-white'
+            } disabled:opacity-50`}
+          >
+            {shareSuccess ? '✓ OK' : sharing ? '...' : 'Compartir'}
+          </motion.button>
 
-        {/* Create Zone button — opens zone manager */}
-        <motion.button
-          whileTap={{ scale: 0.95 }}
-          onClick={() => showZoneCreator ? setShowZoneCreator(false) : setShowZoneManager(true)}
-          className={`px-3 sm:px-5 py-2.5 sm:py-3.5 rounded-[12px] sm:rounded-[14px] font-medium text-sm sm:text-base shadow-lg transition-all ${
-            showZoneCreator
-              ? 'bg-success text-white'
-              : 'bg-surface/90 backdrop-blur-md border border-border/50 text-text-primary'
-          }`}
-        >
-          {showZoneCreator ? 'Cancelar' : 'Zonas'}
-        </motion.button>
+          {/* Create Zone button */}
+          <motion.button
+            whileTap={{ scale: 0.95 }}
+            onClick={() => showZoneCreator ? setShowZoneCreator(false) : setShowZoneManager(true)}
+            className={`px-4 sm:px-5 py-2.5 sm:py-3.5 rounded-[12px] sm:rounded-[14px] font-medium text-sm shadow-lg transition-all flex-shrink-0 ${
+              showZoneCreator
+                ? 'bg-success text-white'
+                : 'bg-surface/90 backdrop-blur-md border border-border/50 text-text-primary'
+            }`}
+          >
+            {showZoneCreator ? 'Cancelar' : 'Zonas'}
+          </motion.button>
 
-        {/* Daily Challenges button */}
-        <motion.button
-          whileTap={{ scale: 0.9 }}
-          onClick={() => setShowDailyChallenges(true)}
-          className="w-10 h-10 sm:w-12 sm:h-12 bg-surface/90 backdrop-blur-md rounded-[12px] sm:rounded-[14px] shadow-lg border border-border/50 flex items-center justify-center flex-shrink-0"
-          title="Desafíos diarios"
-        >
-          <span className="text-lg sm:text-xl">🎯</span>
-        </motion.button>
+          {/* Daily Challenges button */}
+          <motion.button
+            whileTap={{ scale: 0.9 }}
+            onClick={() => setShowDailyChallenges(true)}
+            className="w-10 h-10 sm:w-12 sm:h-12 bg-surface/90 backdrop-blur-md rounded-[12px] sm:rounded-[14px] shadow-lg border border-border/50 flex items-center justify-center flex-shrink-0"
+            title="Desafíos diarios"
+          >
+            <span className="text-lg sm:text-xl">🎯</span>
+          </motion.button>
 
-        {/* Chat button */}
-        <motion.button
-          whileTap={{ scale: 0.9 }}
-          onClick={() => setShowChat(true)}
-          className="w-10 h-10 sm:w-12 sm:h-12 bg-surface/90 backdrop-blur-md rounded-[12px] sm:rounded-[14px] shadow-lg border border-border/50 flex items-center justify-center flex-shrink-0"
-        >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-accent">
-            <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-        </motion.button>
+          {/* Chat button */}
+          <motion.button
+            whileTap={{ scale: 0.9 }}
+            onClick={() => setShowChat(true)}
+            className="w-10 h-10 sm:w-12 sm:h-12 bg-surface/90 backdrop-blur-md rounded-[12px] sm:rounded-[14px] shadow-lg border border-border/50 flex items-center justify-center flex-shrink-0"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-accent">
+              <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </motion.button>
+        </div>
       </div>
-
       {/* Share Bottom Sheet */}
       <ShareBottomSheet
         isOpen={showShareSheet}

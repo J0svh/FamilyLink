@@ -68,11 +68,25 @@ export function CircleChat({ circleId, isOpen, onClose }: CircleChatProps) {
   }, [messages]);
 
   const loadMessages = async () => {
+    // Load cached messages first for instant display
+    const cached = localStorage.getItem(`familylink-chat-${circleId}`);
+    if (cached) {
+      try {
+        const cachedMsgs = JSON.parse(cached);
+        if (Array.isArray(cachedMsgs) && cachedMsgs.length > 0) {
+          setMessages(cachedMsgs);
+        }
+      } catch { /* ignore parse errors */ }
+    }
+
     try {
       const { data } = await api.get(`/chat/circles/${circleId}/messages`);
       setMessages(data.messages);
+      // Cache messages locally
+      localStorage.setItem(`familylink-chat-${circleId}`, JSON.stringify(data.messages));
     } catch (err) {
       console.error('Failed to load messages', err);
+      // Keep cached messages as fallback
     } finally {
       setLoading(false);
     }
@@ -100,7 +114,11 @@ export function CircleChat({ circleId, isOpen, onClose }: CircleChatProps) {
 
     try {
       const { data } = await api.post(`/chat/circles/${circleId}/messages`, { content });
-      setMessages(prev => prev.map(m => m.messageId === optimisticMsg.messageId ? data : m));
+      setMessages(prev => {
+        const updated = prev.map(m => m.messageId === optimisticMsg.messageId ? data : m);
+        localStorage.setItem(`familylink-chat-${circleId}`, JSON.stringify(updated));
+        return updated;
+      });
       incrementChallenge('message');
     } catch {
       setMessages(prev => prev.filter(m => m.messageId !== optimisticMsg.messageId));
