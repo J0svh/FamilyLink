@@ -20,6 +20,7 @@ import { FCMNotificationAdapter } from './notifications/FCMNotificationAdapter';
 
 // Realtime
 import { SocketIOEventPublisher } from './realtime/SocketIOEventPublisher';
+import { OnlineTracker } from './realtime/OnlineTracker';
 
 // Use Cases - Auth
 import { RegisterUserUseCase } from '../application/use-cases/auth/RegisterUserUseCase';
@@ -36,6 +37,9 @@ import { RemoveMemberUseCase } from '../application/use-cases/circle/RemoveMembe
 import { UpdateMemberRoleUseCase } from '../application/use-cases/circle/UpdateMemberRoleUseCase';
 import { UpdateDailyLimitsUseCase } from '../application/use-cases/circle/UpdateDailyLimitsUseCase';
 import { GetUserCirclesUseCase } from '../application/use-cases/circle/GetUserCirclesUseCase';
+import { GetPendingInvitationsUseCase } from '../application/use-cases/circle/GetPendingInvitationsUseCase';
+import { RejectInvitationUseCase } from '../application/use-cases/circle/RejectInvitationUseCase';
+import { GetCircleMembersUseCase } from '../application/use-cases/circle/GetCircleMembersUseCase';
 
 // Use Cases - Location
 import { ShareLocationUseCase } from '../application/use-cases/location/ShareLocationUseCase';
@@ -66,6 +70,7 @@ export interface Container {
   locationCache: UpstashLocationCache;
   notificationService: FCMNotificationAdapter;
   eventPublisher: SocketIOEventPublisher;
+  onlineTracker: OnlineTracker;
 
   // Use Cases - Auth
   registerUserUseCase: RegisterUserUseCase;
@@ -82,6 +87,9 @@ export interface Container {
   updateMemberRoleUseCase: UpdateMemberRoleUseCase;
   updateDailyLimitsUseCase: UpdateDailyLimitsUseCase;
   getUserCirclesUseCase: GetUserCirclesUseCase;
+  getPendingInvitationsUseCase: GetPendingInvitationsUseCase;
+  rejectInvitationUseCase: RejectInvitationUseCase;
+  getCircleMembersUseCase: GetCircleMembersUseCase;
 
   // Use Cases - Location
   shareLocationUseCase: ShareLocationUseCase;
@@ -110,9 +118,10 @@ export function createContainer(io: SocketIOServer | null = null): Container {
   // Services
   const tokenService = new JwtTokenService();
   const passwordHasher = new BcryptPasswordHasher();
-  const locationCache = new UpstashLocationCache(null); // Redis client injected in production
+  const locationCache = new UpstashLocationCache(null);
   const notificationService = new FCMNotificationAdapter();
   const eventPublisher = new SocketIOEventPublisher(io);
+  const onlineTracker = new OnlineTracker();
 
   // Use Cases - Auth
   const registerUserUseCase = new RegisterUserUseCase(userRepo, refreshTokenRepo, tokenService, passwordHasher);
@@ -129,6 +138,9 @@ export function createContainer(io: SocketIOServer | null = null): Container {
   const updateMemberRoleUseCase = new UpdateMemberRoleUseCase(circleRepo);
   const updateDailyLimitsUseCase = new UpdateDailyLimitsUseCase(circleRepo, { save: async () => {}, findByUserAndCircle: async () => null });
   const getUserCirclesUseCase = new GetUserCirclesUseCase(circleRepo);
+  const getPendingInvitationsUseCase = new GetPendingInvitationsUseCase(invitationRepo, circleRepo, userRepo);
+  const rejectInvitationUseCase = new RejectInvitationUseCase(invitationRepo, userRepo);
+  const getCircleMembersUseCase = new GetCircleMembersUseCase(circleRepo, userRepo, onlineTracker);
 
   // Use Cases - Location
   const shareLocationUseCase = new ShareLocationUseCase(userRepo, circleRepo, locationRepo, zoneRepo, locationCache, eventPublisher);
@@ -146,10 +158,11 @@ export function createContainer(io: SocketIOServer | null = null): Container {
 
   return {
     userRepo, circleRepo, zoneRepo, locationRepo, invitationRepo, refreshTokenRepo,
-    tokenService, passwordHasher, locationCache, notificationService, eventPublisher,
+    tokenService, passwordHasher, locationCache, notificationService, eventPublisher, onlineTracker,
     registerUserUseCase, loginUserUseCase, refreshTokenUseCase, logoutUseCase,
     createCircleUseCase, inviteMemberUseCase, acceptInvitationUseCase, dissolveCircleUseCase,
     removeMemberUseCase, updateMemberRoleUseCase, updateDailyLimitsUseCase, getUserCirclesUseCase,
+    getPendingInvitationsUseCase, rejectInvitationUseCase, getCircleMembersUseCase,
     shareLocationUseCase, getCircleLocationsUseCase,
     createZoneUseCase, updateZoneUseCase, deleteZoneUseCase, getZonesByCircleUseCase,
     activatePrivacyModeUseCase, deactivatePrivacyModeUseCase,

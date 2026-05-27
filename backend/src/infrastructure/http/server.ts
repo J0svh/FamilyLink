@@ -76,6 +76,9 @@ app.use('/api/v1/circles', authMiddleware, createCircleRoutes(
   container.updateMemberRoleUseCase,
   container.updateDailyLimitsUseCase,
   container.getUserCirclesUseCase,
+  container.getPendingInvitationsUseCase,
+  container.rejectInvitationUseCase,
+  container.getCircleMembersUseCase,
 ));
 
 app.use('/api/v1/locations', authMiddleware, createLocationRoutes(
@@ -108,13 +111,23 @@ app.use('/api/v1/auth', createSocialAuthRoutes(socialLoginUseCase));
 // Error handler (must be last)
 app.use(errorHandler);
 
-// Socket.IO connection handling
+// Socket.IO connection handling with online presence
+const onlineTracker = container.onlineTracker;
+
 io.on('connection', (socket) => {
-  logger.debug({ socketId: socket.id }, 'Client connected');
+  const userId = socket.handshake.auth?.userId as string | undefined;
+  logger.debug({ socketId: socket.id, userId }, 'Client connected');
+
+  if (userId) {
+    onlineTracker.addConnection(userId, socket.id);
+  }
 
   socket.on('join:circle', (circleId: string) => {
     socket.join(`circle:${circleId}`);
     logger.debug({ socketId: socket.id, circleId }, 'Client joined circle room');
+    if (userId) {
+      socket.to(`circle:${circleId}`).emit('member:online', { userId });
+    }
   });
 
   socket.on('leave:circle', (circleId: string) => {
@@ -123,6 +136,17 @@ io.on('connection', (socket) => {
 
   socket.on('disconnect', () => {
     logger.debug({ socketId: socket.id }, 'Client disconnected');
+    if (userId) {
+      const wentOffline = onlineTracker.removeConnection(userId, socket.id);
+      if (wentOffline) {
+        // Broadcast offline to all circle rooms
+        socket.rooms.forEach((room) => {
+          if (room.startsWith('circle:')) {
+            io.to(room).emit('member:offline', { userId });
+          }
+        });
+      }
+    }
   });
 });
 

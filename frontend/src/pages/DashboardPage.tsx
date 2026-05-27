@@ -6,6 +6,9 @@ import { api } from '../lib/api';
 import { useAuthStore } from '../stores/authStore';
 import { useCircleStore } from '../stores/circleStore';
 import { InviteModal } from '../components/InviteModal';
+import { InvitationInbox } from '../components/InvitationInbox';
+import { MemberDrawer } from '../components/MemberDrawer';
+import { CircleChat } from '../components/CircleChat';
 import { ToastContainer } from '../components/Toast';
 import { OnboardingTutorial, DASHBOARD_ONBOARDING_STEPS } from '../components/OnboardingTutorial';
 
@@ -18,6 +21,9 @@ export default function DashboardPage() {
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [inviteCircleId, setInviteCircleId] = useState('');
   const [newCircleName, setNewCircleName] = useState('');
+  const [selectedCircleId, setSelectedCircleId] = useState<string | null>(null);
+  const [showMemberDrawer, setShowMemberDrawer] = useState(false);
+  const [showChat, setShowChat] = useState(false);
 
   // Load circles from backend on mount
   useEffect(() => {
@@ -29,8 +35,6 @@ export default function DashboardPage() {
         }
       } catch (err) {
         console.error('Failed to load circles from backend', err);
-        // Keep local store circles as fallback
-      } finally {
       }
     };
     loadCircles();
@@ -60,6 +64,22 @@ export default function DashboardPage() {
     setShowInviteModal(true);
   };
 
+  const handleCircleClick = (circleId: string) => {
+    setSelectedCircleId(circleId);
+    setShowMemberDrawer(true);
+  };
+
+  const handleOpenChat = () => {
+    setShowMemberDrawer(false);
+    setShowChat(true);
+  };
+
+  const handleCircleAdded = (circle: { circleId: string; name: string; role: string }) => {
+    addCircle(circle);
+  };
+
+  const selectedCircle = circles.find((c) => c.circleId === selectedCircleId);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0f0c29] via-[#302b63] to-[#24243e]">
       <ToastContainer />
@@ -70,14 +90,17 @@ export default function DashboardPage() {
         <div className="max-w-2xl mx-auto flex items-center justify-between">
           <div>
             <h1 className="text-xl font-bold text-white">FamilyLink</h1>
-            <p className="text-sm text-white/60">Hola, {username} 👋</p>
+            <p className="text-sm text-white/60">Hola, {username} &#x1f44b;</p>
           </div>
-          <button
-            onClick={handleLogout}
-            className="text-sm text-white/50 hover:text-white/80 transition-colors px-3 py-1.5 rounded-[10px] border border-white/10 hover:border-white/20"
-          >
-            {t('auth.logout')}
-          </button>
+          <div className="flex items-center gap-3">
+            <InvitationInbox onCircleAdded={handleCircleAdded} />
+            <button
+              onClick={handleLogout}
+              className="text-sm text-white/50 hover:text-white/80 transition-colors px-3 py-1.5 rounded-[10px] border border-white/10 hover:border-white/20"
+            >
+              {t('auth.logout')}
+            </button>
+          </div>
         </div>
       </header>
 
@@ -102,7 +125,7 @@ export default function DashboardPage() {
               </svg>
             </div>
             <p className="text-white/70 text-base">{t('dashboard.noCircles')}</p>
-            <p className="text-white/40 text-sm mt-2">Crea un círculo para empezar</p>
+            <p className="text-white/40 text-sm mt-2">Crea un c&#xed;rculo para empezar</p>
           </motion.div>
         ) : (
           <div className="space-y-3">
@@ -115,10 +138,10 @@ export default function DashboardPage() {
                 className="bg-white/5 backdrop-blur-sm rounded-[16px] border border-white/10 p-5 hover:bg-white/10 transition-all group"
               >
                 <div className="flex items-center justify-between">
-                  <button onClick={() => navigate(`/map/${circle.circleId}`)} className="flex-1 text-left">
+                  <button onClick={() => handleCircleClick(circle.circleId)} className="flex-1 text-left">
                     <h3 className="font-medium text-white">{circle.name}</h3>
                     <p className="text-sm text-white/50 mt-0.5">
-                      {circle.role === 'CIRCLE_ADMIN' ? '👑 Admin' : 'Miembro'}
+                      {circle.role === 'CIRCLE_ADMIN' ? '&#x1f451; Admin' : 'Miembro'}
                     </p>
                   </button>
 
@@ -140,6 +163,7 @@ export default function DashboardPage() {
                     <button
                       onClick={() => navigate(`/map/${circle.circleId}`)}
                       className="w-9 h-9 flex items-center justify-center rounded-full bg-accent/20 hover:bg-accent/30 transition-colors"
+                      title="Ver mapa"
                     >
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
                         <path d="M5 12h14M12 5l7 7-7 7"/>
@@ -167,7 +191,7 @@ export default function DashboardPage() {
                 type="text"
                 value={newCircleName}
                 onChange={(e) => setNewCircleName(e.target.value)}
-                placeholder="Nombre del círculo"
+                placeholder="Nombre del c&#xed;rculo"
                 required
                 maxLength={100}
                 className="w-full px-4 py-3 bg-background border border-border rounded-[12px] text-text-primary focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent"
@@ -188,6 +212,24 @@ export default function DashboardPage() {
         isOpen={showInviteModal}
         onClose={() => setShowInviteModal(false)}
       />
+
+      {/* Member Drawer */}
+      <MemberDrawer
+        circleId={selectedCircleId || ''}
+        circleName={selectedCircle?.name || ''}
+        isOpen={showMemberDrawer}
+        onClose={() => setShowMemberDrawer(false)}
+        onOpenChat={handleOpenChat}
+      />
+
+      {/* Circle Chat */}
+      {selectedCircleId && (
+        <CircleChat
+          circleId={selectedCircleId}
+          isOpen={showChat}
+          onClose={() => setShowChat(false)}
+        />
+      )}
     </div>
   );
 }

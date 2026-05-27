@@ -8,6 +8,9 @@ import { RemoveMemberUseCase } from '../../../application/use-cases/circle/Remov
 import { UpdateMemberRoleUseCase } from '../../../application/use-cases/circle/UpdateMemberRoleUseCase';
 import { UpdateDailyLimitsUseCase } from '../../../application/use-cases/circle/UpdateDailyLimitsUseCase';
 import { GetUserCirclesUseCase } from '../../../application/use-cases/circle/GetUserCirclesUseCase';
+import { GetPendingInvitationsUseCase } from '../../../application/use-cases/circle/GetPendingInvitationsUseCase';
+import { RejectInvitationUseCase } from '../../../application/use-cases/circle/RejectInvitationUseCase';
+import { GetCircleMembersUseCase } from '../../../application/use-cases/circle/GetCircleMembersUseCase';
 import { validate } from '../middleware/validate';
 import { asyncHandler } from '../middleware/asyncHandler';
 
@@ -29,6 +32,18 @@ const inviteMemberSchema = z.object({
 const acceptInvitationSchema = z.object({
   params: z.object({
     invitationId: z.string().uuid(),
+  }),
+});
+
+const rejectInvitationSchema = z.object({
+  params: z.object({
+    invitationId: z.string().uuid(),
+  }),
+});
+
+const getCircleMembersSchema = z.object({
+  params: z.object({
+    circleId: z.string().uuid(),
   }),
 });
 
@@ -68,12 +83,21 @@ export function createCircleRoutes(
   updateMemberRoleUseCase: UpdateMemberRoleUseCase,
   updateDailyLimitsUseCase: UpdateDailyLimitsUseCase,
   getUserCirclesUseCase: GetUserCirclesUseCase,
+  getPendingInvitationsUseCase: GetPendingInvitationsUseCase,
+  rejectInvitationUseCase: RejectInvitationUseCase,
+  getCircleMembersUseCase: GetCircleMembersUseCase,
 ): Router {
   const router = Router();
 
   // GET user's circles
   router.get('/', asyncHandler(async (req, res) => {
     const result = await getUserCirclesUseCase.execute(req.user!.userId);
+    res.json(result);
+  }));
+
+  // GET pending invitations for current user
+  router.get('/invitations/pending', asyncHandler(async (req, res) => {
+    const result = await getPendingInvitationsUseCase.execute(req.user!.userId);
     res.json(result);
   }));
 
@@ -98,6 +122,24 @@ export function createCircleRoutes(
     const result = await acceptInvitationUseCase.execute({
       invitationId: req.params.invitationId,
       userId: req.user!.userId,
+    });
+    res.json(result);
+  }));
+
+  // POST reject invitation
+  router.post('/invitations/:invitationId/reject', validate(rejectInvitationSchema), asyncHandler(async (req, res) => {
+    await rejectInvitationUseCase.execute({
+      invitationId: req.params.invitationId,
+      userId: req.user!.userId,
+    });
+    res.status(204).send();
+  }));
+
+  // GET circle members
+  router.get('/:circleId/members', validate(getCircleMembersSchema), asyncHandler(async (req, res) => {
+    const result = await getCircleMembersUseCase.execute({
+      circleId: req.params.circleId,
+      requestingUserId: req.user!.userId,
     });
     res.json(result);
   }));
