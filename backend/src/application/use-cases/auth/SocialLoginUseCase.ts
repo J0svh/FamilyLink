@@ -75,7 +75,7 @@ export class SocialLoginUseCase {
       userId: user.id,
       email: user.email,
     });
-    const refreshToken = this.tokenService.generateRefreshToken(user.id);
+    const refreshToken = this.tokenService.generateRefreshToken({ userId: user.id, email: user.email });
 
     return {
       accessToken,

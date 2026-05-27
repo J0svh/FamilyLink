@@ -26,6 +26,7 @@ import { SocialLoginUseCase } from '../../application/use-cases/auth/SocialLogin
 import { PrismaSocialAccountRepository } from '../persistence/PrismaSocialAccountRepository';
 
 const app = express();
+app.set('trust proxy', 1);
 const httpServer = createServer(app);
 
 // Socket.IO setup
