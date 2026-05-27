@@ -4,7 +4,6 @@ interface SocialLoginButtonsProps {
 
 export function SocialLoginButtons({ className = '' }: SocialLoginButtonsProps) {
   const apiUrl = import.meta.env.VITE_API_URL || '/api/v1';
-  const baseUrl = apiUrl.replace('/api/v1', '');
 
   const handleGoogleLogin = () => {
     window.location.href = `${apiUrl}/auth/google`;

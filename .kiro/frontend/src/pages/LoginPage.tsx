@@ -52,7 +52,8 @@ export default function LoginPage() {
       navigate('/dashboard');
     } catch (err: any) {
       const status = err.response?.status;
-      if (status === 401) setError('Email o contraseña incorrectos. Revisa tus datos e inténtalo de nuevo.');
+      if (status === 401) setError('Email o contraseña incorrectos. Si no tienes cuenta, puedes crear una.');
+      else if (status === 404) setError('No existe una cuenta con este correo. Crea una cuenta para empezar.');
       else if (status === 429) setError('Demasiados intentos. Espera unos minutos antes de volver a intentarlo.');
       else setError('No se pudo conectar con el servidor. Comprueba tu conexión.');
     } finally {

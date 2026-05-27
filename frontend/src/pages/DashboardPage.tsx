@@ -18,7 +18,6 @@ export default function DashboardPage() {
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [inviteCircleId, setInviteCircleId] = useState('');
   const [newCircleName, setNewCircleName] = useState('');
-  const [loadingCircles, setLoadingCircles] = useState(true);
 
   // Load circles from backend on mount
   useEffect(() => {
@@ -32,7 +31,6 @@ export default function DashboardPage() {
         console.error('Failed to load circles from backend', err);
         // Keep local store circles as fallback
       } finally {
-        setLoadingCircles(false);
       }
     };
     loadCircles();
