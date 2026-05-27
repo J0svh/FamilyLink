@@ -158,9 +158,21 @@ export default function MapPage() {
   }, [circleId]);
 
   const loadLocations = async () => {
+    // Save current self-location before overwriting
+    const currentSelf = members.find(m => m.userId === userId);
     try {
       const { data } = await api.get(`/locations/circles/${circleId}`);
-      setMembers(data.members);
+      const backendMembers = data.members;
+      // If backend shows self with lat=0 but we have a local position, keep local
+      if (currentSelf && currentSelf.latitude !== 0) {
+        const selfInBackend = backendMembers.find((m: any) => m.userId === userId);
+        if (selfInBackend && selfInBackend.latitude === 0) {
+          selfInBackend.latitude = currentSelf.latitude;
+          selfInBackend.longitude = currentSelf.longitude;
+          selfInBackend.capturedAt = currentSelf.capturedAt;
+        }
+      }
+      setMembers(backendMembers);
     } catch (err) {
       console.error('Failed to load locations', err);
     } finally {
@@ -443,7 +455,7 @@ export default function MapPage() {
             className="w-10 h-10 sm:w-12 sm:h-12 bg-surface/90 backdrop-blur-md rounded-[12px] sm:rounded-[14px] shadow-lg border border-border/50 flex items-center justify-center flex-shrink-0"
             title="Desafíos diarios"
           >
-            <span className="text-lg sm:text-xl">🎯</span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
           </motion.button>
 
           {/* Chat button */}

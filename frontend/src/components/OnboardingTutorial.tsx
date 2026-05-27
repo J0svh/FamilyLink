@@ -39,6 +39,12 @@ export function OnboardingTutorial({ steps, storageKey }: OnboardingTutorialProp
     }
   };
 
+  const handleBack = () => {
+    if (currentStep > 0) {
+      setCurrentStep(currentStep - 1);
+    }
+  };
+
   const handleSkip = () => {
     localStorage.setItem(storageKey, Date.now().toString());
     setVisible(false);
@@ -48,6 +54,7 @@ export function OnboardingTutorial({ steps, storageKey }: OnboardingTutorialProp
 
   const step = steps[currentStep];
   const isLast = currentStep === steps.length - 1;
+  const isFirst = currentStep === 0;
 
   return (
     <AnimatePresence>
@@ -89,13 +96,21 @@ export function OnboardingTutorial({ steps, storageKey }: OnboardingTutorialProp
             {steps.map((_, i) => (
               <div
                 key={i}
-                className={`w-2 h-2 rounded-full transition-all ${i === currentStep ? 'bg-accent w-5' : 'bg-border'}`}
+                className={`w-2 h-2 rounded-full transition-all ${i === currentStep ? 'bg-accent w-5' : i < currentStep ? 'bg-accent/50' : 'bg-border'}`}
               />
             ))}
           </div>
 
           {/* Actions */}
-          <div className="px-6 pb-6 flex gap-3">
+          <div className="px-6 pb-6 flex gap-2">
+            {!isFirst && (
+              <button
+                onClick={handleBack}
+                className="px-4 py-3 text-accent text-sm font-medium hover:bg-accent/5 rounded-[12px] transition-colors"
+              >
+                Atrás
+              </button>
+            )}
             <button
               onClick={handleSkip}
               className="flex-1 py-3 text-text-secondary text-sm font-medium hover:text-text-primary transition-colors"

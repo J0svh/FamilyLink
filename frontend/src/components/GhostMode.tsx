@@ -36,7 +36,7 @@ export function GhostMode({ isActive, onToggle }: GhostModeProps) {
         }`}
         title={isActive ? 'Modo fantasma activo' : 'Activar modo fantasma'}
       >
-        👻
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 10h.01M15 10h.01M12 2a8 8 0 00-8 8v12l3-3 2 2 3-3 3 3 2-2 3 3V10a8 8 0 00-8-8z"/></svg>
       </button>
 
       <AnimatePresence>
