@@ -40,9 +40,11 @@ api.interceptors.response.use(
     }
 
     // Auto-refresh on 401 — skip for auth endpoints (login/register don't need refresh)
-    const isAuthEndpoint = originalRequest.url?.includes('/auth/login') ||
-      originalRequest.url?.includes('/auth/register') ||
-      originalRequest.url?.includes('/auth/refresh');
+    const requestUrl = originalRequest.url || '';
+    const isAuthEndpoint = requestUrl.includes('/auth/login') ||
+      requestUrl.includes('/auth/register') ||
+      requestUrl.includes('/auth/refresh') ||
+      requestUrl.includes('/auth/google');
 
     if (error.response?.status === 401 && !originalRequest._retry && !isAuthEndpoint) {
       originalRequest._retry = true;
@@ -50,7 +52,6 @@ api.interceptors.response.use(
       const refreshToken = useAuthStore.getState().refreshToken;
       if (!refreshToken) {
         useAuthStore.getState().logout();
-        window.location.href = '/login';
         return Promise.reject(error);
       }
 
@@ -64,7 +65,6 @@ api.interceptors.response.use(
         return api(originalRequest);
       } catch {
         useAuthStore.getState().logout();
-        window.location.href = '/login';
         return Promise.reject(error);
       }
     }
