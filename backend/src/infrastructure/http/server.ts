@@ -99,6 +99,11 @@ const sendMessageUseCase = new SendMessageUseCase(container.circleRepo);
 const getMessagesUseCase = new GetMessagesUseCase(container.circleRepo);
 app.use('/api/v1/chat', authMiddleware, createChatRoutes(sendMessageUseCase, getMessagesUseCase));
 
+// Social auth routes (public - OAuth redirects)
+const socialAccountRepo = new PrismaSocialAccountRepository();
+const socialLoginUseCase = new SocialLoginUseCase(socialAccountRepo, container.tokenService);
+app.use('/api/v1/auth', createSocialAuthRoutes(socialLoginUseCase));
+
 // Error handler (must be last)
 app.use(errorHandler);
 
