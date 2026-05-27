@@ -11,7 +11,7 @@ export function useSocket(circleId: string | null) {
   useEffect(() => {
     if (!circleId || !accessToken) return;
 
-    const socket = io('/', {
+    const socket = io(import.meta.env.VITE_API_URL?.replace('/api/v1', '') || '/', {
       path: '/ws',
       auth: { token: accessToken },
       transports: ['websocket'],

@@ -1,19 +1,31 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { api } from '../lib/api';
 import { useAuthStore } from '../stores/authStore';
+import { SocialLoginButtons } from '../components/SocialLoginButtons';
 
 function isValidEmail(email: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
 }
 
+function getErrorMessage(code: string): string {
+  const messages: Record<string, string> = {
+    'auth-failed': 'La autenticación falló. Inténtalo de nuevo.',
+    'email-required': 'El proveedor no proporcionó un correo electrónico. Usa otro método.',
+    'provider-unavailable': 'El proveedor no está disponible. Inténtalo más tarde.',
+    'server-error': 'Ocurrió un error inesperado. Inténtalo de nuevo.',
+  };
+  return messages[code] || 'Error de autenticación. Inténtalo de nuevo.';
+}
+
 export default function LoginPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { setTokens, setUser } = useAuthStore();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [error, setError] = useState(searchParams.get('error') ? getErrorMessage(searchParams.get('error')!) : '');
   const [fieldErrors, setFieldErrors] = useState<{ email?: string; password?: string }>({});
   const [loading, setLoading] = useState(false);
 
@@ -114,6 +126,9 @@ export default function LoginPage() {
             <button type="submit" disabled={loading} className="w-full py-3.5 bg-accent hover:bg-accent-hover text-white font-semibold rounded-[14px] transition-colors disabled:opacity-50">
               {loading ? 'Iniciando sesión...' : 'Iniciar sesión'}
             </button>
+
+            {/* Social login */}
+            <SocialLoginButtons />
           </form>
 
           <p className="text-center mt-8 text-sm text-text-secondary">

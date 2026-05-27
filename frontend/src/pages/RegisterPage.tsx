@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { api } from '../lib/api';
 import { useAuthStore } from '../stores/authStore';
+import { SocialLoginButtons } from '../components/SocialLoginButtons';
 
 function isValidEmail(email: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
@@ -123,6 +124,9 @@ export default function RegisterPage() {
             <button type="submit" disabled={loading} className="w-full py-3.5 bg-accent hover:bg-accent-hover text-white font-semibold rounded-[14px] transition-colors disabled:opacity-50">
               {loading ? 'Creando cuenta...' : 'Crear cuenta'}
             </button>
+
+            {/* Social login */}
+            <SocialLoginButtons />
           </form>
 
           <p className="text-center mt-8 text-sm text-text-secondary">

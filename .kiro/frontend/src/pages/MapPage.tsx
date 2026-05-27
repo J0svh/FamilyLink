@@ -60,17 +60,34 @@ export default function MapPage() {
 
   /**
    * Generate stories from members data for SnapMapStory
+   * Only show members who have actually shared their location (not epoch date)
    */
   const stories = members
-    .filter(m => m.latitude !== 0 && !m.isPrivacyModeActive)
-    .map(m => ({
-      userId: m.userId,
-      username: m.username,
-      avatarId: 'avatar-04',
-      action: 'compartió ubicación',
-      timeAgo: 'hace ' + Math.floor((Date.now() - new Date(m.capturedAt).getTime()) / 60000) + ' min',
-    }))
-    .filter(s => !s.timeAgo.includes('NaN'));
+    .filter(m => {
+      if (m.latitude === 0 || m.isPrivacyModeActive) return false;
+      // Filter out members who never shared (capturedAt is epoch or very old)
+      const capturedTime = new Date(m.capturedAt).getTime();
+      if (capturedTime < 86400000) return false; // epoch = never shared
+      const hoursSince = (Date.now() - capturedTime) / 3600000;
+      if (hoursSince > 168) return false; // older than 7 days
+      return true;
+    })
+    .map(m => {
+      const minutesAgo = Math.floor((Date.now() - new Date(m.capturedAt).getTime()) / 60000);
+      let timeAgo = '';
+      if (minutesAgo < 1) timeAgo = 'ahora';
+      else if (minutesAgo < 60) timeAgo = `hace ${minutesAgo} min`;
+      else if (minutesAgo < 1440) timeAgo = `hace ${Math.floor(minutesAgo / 60)}h`;
+      else timeAgo = `hace ${Math.floor(minutesAgo / 1440)}d`;
+
+      return {
+        userId: m.userId,
+        username: m.username,
+        avatarId: m.userId === userId ? (avatarId || 'avatar-17') : null,
+        action: 'compartió ubicación',
+        timeAgo,
+      };
+    });
 
   /**
    * Generate heatmap points from member locations
@@ -285,29 +302,31 @@ export default function MapPage() {
       </Map>
 
       {/* Top left — Back button + SnapMapStory */}
-      <div className="absolute top-4 left-4 flex flex-col gap-3">
+      <div className="absolute top-4 left-2 sm:left-4 flex flex-col gap-2 sm:gap-3 max-w-[180px] sm:max-w-[240px]">
         <button
           onClick={() => navigate('/dashboard')}
-          className="pointer-events-auto bg-surface/90 backdrop-blur-md rounded-[14px] px-4 py-2.5 shadow-lg text-sm font-medium text-text-primary hover:bg-surface transition-all border border-border/50"
+          className="pointer-events-auto bg-surface/90 backdrop-blur-md rounded-[12px] sm:rounded-[14px] px-3 sm:px-4 py-2 sm:py-2.5 shadow-lg text-xs sm:text-sm font-medium text-text-primary hover:bg-surface transition-all border border-border/50"
         >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="inline mr-1.5 -mt-0.5">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="inline mr-1 -mt-0.5">
             <path d="M19 12H5M12 19l-7-7 7-7" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
           Volver
         </button>
 
         {/* SnapMapStory — recent activity */}
-        <SnapMapStory stories={stories} />
+        <div className="hidden sm:block">
+          <SnapMapStory stories={stories} />
+        </div>
       </div>
 
       {/* Center — Map style selector */}
-      <div className="absolute top-4 left-1/2 -translate-x-1/2">
-        <div className="flex gap-1 bg-surface/90 backdrop-blur-md rounded-[14px] p-1.5 shadow-lg border border-border/50">
+      <div className="absolute top-4 left-1/2 -translate-x-1/2 max-w-[calc(100vw-120px)]">
+        <div className="flex gap-1 bg-surface/90 backdrop-blur-md rounded-[14px] p-1 sm:p-1.5 shadow-lg border border-border/50 overflow-x-auto scrollbar-hide">
           {(['streets', 'dark', 'satellite', 'toner'] as MapStyleKey[]).map((s) => (
             <button
               key={s}
               onClick={() => { setStyle(s); if (s === 'dark') incrementChallenge('darkmap'); }}
-              className={`px-3 py-1.5 rounded-[10px] text-xs font-medium transition-all ${
+              className={`px-2 sm:px-3 py-1.5 rounded-[10px] text-xs font-medium transition-all whitespace-nowrap flex-shrink-0 ${
                 style === s
                   ? 'bg-accent text-white shadow-sm'
                   : 'text-text-secondary hover:text-text-primary hover:bg-background'
@@ -321,39 +340,39 @@ export default function MapPage() {
       </div>
 
       {/* Right side — Zoom controls + center + 3D + Ghost + Heatmap */}
-      <div className="absolute right-4 top-1/2 -translate-y-1/2 flex flex-col gap-2">
+      <div className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 flex flex-col gap-1.5 sm:gap-2">
         <button
           onClick={() => setViewState({ zoom: (viewState.zoom || 13) + 1 })}
-          className="bg-surface/90 backdrop-blur-md rounded-[12px] w-10 h-10 shadow-lg flex items-center justify-center hover:bg-surface transition-all border border-border/50"
+          className="bg-surface/90 backdrop-blur-md rounded-[10px] sm:rounded-[12px] w-9 h-9 sm:w-10 sm:h-10 shadow-lg flex items-center justify-center hover:bg-surface transition-all border border-border/50"
         >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
             <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
           </svg>
         </button>
         <button
           onClick={() => setViewState({ zoom: (viewState.zoom || 13) - 1 })}
-          className="bg-surface/90 backdrop-blur-md rounded-[12px] w-10 h-10 shadow-lg flex items-center justify-center hover:bg-surface transition-all border border-border/50"
+          className="bg-surface/90 backdrop-blur-md rounded-[10px] sm:rounded-[12px] w-9 h-9 sm:w-10 sm:h-10 shadow-lg flex items-center justify-center hover:bg-surface transition-all border border-border/50"
         >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
             <line x1="5" y1="12" x2="19" y2="12"/>
           </svg>
         </button>
-        <div className="h-px bg-border/50 mx-2" />
+        <div className="h-px bg-border/50 mx-1.5" />
         <button
           onClick={centerOnMe}
-          className="bg-surface/90 backdrop-blur-md rounded-[12px] w-10 h-10 shadow-lg flex items-center justify-center text-accent hover:bg-surface transition-all border border-border/50"
+          className="bg-surface/90 backdrop-blur-md rounded-[10px] sm:rounded-[12px] w-9 h-9 sm:w-10 sm:h-10 shadow-lg flex items-center justify-center text-accent hover:bg-surface transition-all border border-border/50"
           title="Centrar en mi ubicación"
         >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
             <circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/>
           </svg>
         </button>
         <button
           onClick={() => setShow3DBuildings(!show3DBuildings)}
-          className={`bg-surface/90 backdrop-blur-md rounded-[12px] w-10 h-10 shadow-lg flex items-center justify-center transition-all border border-border/50 ${show3DBuildings ? 'text-accent' : 'text-text-secondary'}`}
+          className={`bg-surface/90 backdrop-blur-md rounded-[10px] sm:rounded-[12px] w-9 h-9 sm:w-10 sm:h-10 shadow-lg flex items-center justify-center transition-all border border-border/50 ${show3DBuildings ? 'text-accent' : 'text-text-secondary'}`}
           title="Edificios 3D"
         >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/>
           </svg>
         </button>
@@ -364,78 +383,81 @@ export default function MapPage() {
         {/* Heatmap toggle */}
         <button
           onClick={() => { setShowHeatmap(!showHeatmap); if (!showHeatmap) incrementChallenge('heatmap'); }}
-          className={`bg-surface/90 backdrop-blur-md rounded-[12px] w-10 h-10 shadow-lg flex items-center justify-center transition-all border border-border/50 ${showHeatmap ? 'text-accent' : 'text-text-secondary'}`}
+          className={`bg-surface/90 backdrop-blur-md rounded-[10px] sm:rounded-[12px] w-9 h-9 sm:w-10 sm:h-10 shadow-lg flex items-center justify-center transition-all border border-border/50 ${showHeatmap ? 'text-accent' : 'text-text-secondary'}`}
           title="Mapa de calor"
         >
           🔥
         </button>
       </div>
 
-      {/* Bottom action bar */}
-      <div className="absolute bottom-6 left-4 right-4 flex justify-center items-center gap-3">
-        {/* Status button */}
-        <motion.button
-          whileTap={{ scale: 0.9 }}
-          onClick={() => setShowStatusSelector(true)}
-          className="w-12 h-12 bg-surface/90 backdrop-blur-md rounded-[14px] shadow-lg border border-border/50 flex items-center justify-center"
-        >
-          <span className="text-xl">
-            {manualState === 'walking' ? '🚶' : manualState === 'sleeping' ? '😴' : manualState === 'working' ? '💼' : '🧍'}
-          </span>
-        </motion.button>
+      {/* Bottom action bar — horizontal scroll carousel */}
+      <div className="absolute bottom-3 left-0 right-0 sm:bottom-6 sm:left-4 sm:right-4">
+        <div className="flex items-center gap-2 sm:gap-3 overflow-x-auto scrollbar-hide px-3 sm:px-0 pb-1 sm:justify-center">
+          {/* Status button */}
+          <motion.button
+            whileTap={{ scale: 0.9 }}
+            onClick={() => setShowStatusSelector(true)}
+            className="w-10 h-10 sm:w-12 sm:h-12 bg-surface/90 backdrop-blur-md rounded-[12px] sm:rounded-[14px] shadow-lg border border-border/50 flex items-center justify-center flex-shrink-0"
+          >
+            <span className="text-lg sm:text-xl">
+              {manualState === 'walking' ? '🚶' : manualState === 'sleeping' ? '😴' : manualState === 'working' ? '💼' : '🧍'}
+            </span>
+          </motion.button>
 
-        {/* ArrivedSafe button */}
-        <ArrivedSafe circleId={circleId || ''} />
+          {/* ArrivedSafe button */}
+          <div className="flex-shrink-0">
+            <ArrivedSafe circleId={circleId || ''} />
+          </div>
 
-        {/* Share location button */}
-        <motion.button
-          whileTap={{ scale: 0.95 }}
-          onClick={() => setShowShareSheet(true)}
-          disabled={sharing}
-          className={`px-6 py-3.5 rounded-[14px] font-medium shadow-lg transition-all ${
-            shareSuccess
-              ? 'bg-success text-white'
-              : 'bg-accent hover:bg-accent-hover text-white'
-          } disabled:opacity-50`}
-        >
-          {shareSuccess ? '✓ Compartida' : sharing ? '...' : 'Compartir ubicación'}
-        </motion.button>
+          {/* Share location button */}
+          <motion.button
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setShowShareSheet(true)}
+            disabled={sharing}
+            className={`px-4 sm:px-6 py-2.5 sm:py-3.5 rounded-[12px] sm:rounded-[14px] font-medium text-sm shadow-lg transition-all flex-shrink-0 ${
+              shareSuccess
+                ? 'bg-success text-white'
+                : 'bg-accent hover:bg-accent-hover text-white'
+            } disabled:opacity-50`}
+          >
+            {shareSuccess ? '✓ OK' : sharing ? '...' : 'Compartir'}
+          </motion.button>
 
-        {/* Create Zone button — opens zone manager */}
-        <motion.button
-          whileTap={{ scale: 0.95 }}
-          onClick={() => showZoneCreator ? setShowZoneCreator(false) : setShowZoneManager(true)}
-          className={`px-5 py-3.5 rounded-[14px] font-medium shadow-lg transition-all ${
-            showZoneCreator
-              ? 'bg-success text-white'
-              : 'bg-surface/90 backdrop-blur-md border border-border/50 text-text-primary'
-          }`}
-        >
-          {showZoneCreator ? 'Cancelar' : 'Zonas'}
-        </motion.button>
+          {/* Create Zone button */}
+          <motion.button
+            whileTap={{ scale: 0.95 }}
+            onClick={() => showZoneCreator ? setShowZoneCreator(false) : setShowZoneManager(true)}
+            className={`px-4 sm:px-5 py-2.5 sm:py-3.5 rounded-[12px] sm:rounded-[14px] font-medium text-sm shadow-lg transition-all flex-shrink-0 ${
+              showZoneCreator
+                ? 'bg-success text-white'
+                : 'bg-surface/90 backdrop-blur-md border border-border/50 text-text-primary'
+            }`}
+          >
+            {showZoneCreator ? 'Cancelar' : 'Zonas'}
+          </motion.button>
 
-        {/* Daily Challenges button */}
-        <motion.button
-          whileTap={{ scale: 0.9 }}
-          onClick={() => setShowDailyChallenges(true)}
-          className="w-12 h-12 bg-surface/90 backdrop-blur-md rounded-[14px] shadow-lg border border-border/50 flex items-center justify-center"
-          title="Desafíos diarios"
-        >
-          <span className="text-xl">🎯</span>
-        </motion.button>
+          {/* Daily Challenges button */}
+          <motion.button
+            whileTap={{ scale: 0.9 }}
+            onClick={() => setShowDailyChallenges(true)}
+            className="w-10 h-10 sm:w-12 sm:h-12 bg-surface/90 backdrop-blur-md rounded-[12px] sm:rounded-[14px] shadow-lg border border-border/50 flex items-center justify-center flex-shrink-0"
+            title="Desafíos diarios"
+          >
+            <span className="text-lg sm:text-xl">🎯</span>
+          </motion.button>
 
-        {/* Chat button */}
-        <motion.button
-          whileTap={{ scale: 0.9 }}
-          onClick={() => setShowChat(true)}
-          className="w-12 h-12 bg-surface/90 backdrop-blur-md rounded-[14px] shadow-lg border border-border/50 flex items-center justify-center"
-        >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-accent">
-            <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-        </motion.button>
+          {/* Chat button */}
+          <motion.button
+            whileTap={{ scale: 0.9 }}
+            onClick={() => setShowChat(true)}
+            className="w-10 h-10 sm:w-12 sm:h-12 bg-surface/90 backdrop-blur-md rounded-[12px] sm:rounded-[14px] shadow-lg border border-border/50 flex items-center justify-center flex-shrink-0"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-accent">
+              <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </motion.button>
+        </div>
       </div>
-
       {/* Share Bottom Sheet */}
       <ShareBottomSheet
         isOpen={showShareSheet}

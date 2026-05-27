@@ -10,6 +10,7 @@ const MapPage = lazy(() => import('./pages/MapPage'));
 const CircleManagementPage = lazy(() => import('./pages/CircleManagementPage'));
 const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage'));
 const ProfilePage = lazy(() => import('./pages/ProfilePage'));
+const AuthCallbackPage = lazy(() => import('./pages/AuthCallbackPage'));
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
@@ -24,6 +25,7 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/auth/callback" element={<AuthCallbackPage />} />
           <Route path="/dashboard" element={<PrivateRoute><DashboardPage /></PrivateRoute>} />
           <Route path="/map/:circleId" element={<PrivateRoute><MapPage /></PrivateRoute>} />
           <Route path="/circle/:circleId/manage" element={<PrivateRoute><CircleManagementPage /></PrivateRoute>} />

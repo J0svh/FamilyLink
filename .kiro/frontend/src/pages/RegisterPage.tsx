@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { api } from '../lib/api';
 import { useAuthStore } from '../stores/authStore';
+import { SocialLoginButtons } from '../components/SocialLoginButtons';
 
 function isValidEmail(email: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
@@ -82,7 +83,7 @@ export default function RegisterPage() {
               <input
                 type="text"
                 value={username}
-                onChange={(e) => { setUsername(e.target.value); setFieldErrors(f => ({ ...f, username: undefined })); }}
+                onChange={(e) => setUsername(e.target.value)}
                 maxLength={50}
                 className={`w-full px-4 py-3.5 bg-surface border rounded-[14px] text-text-primary placeholder-text-secondary/40 focus:outline-none focus:ring-2 focus:ring-accent/30 transition-all ${fieldErrors.username ? 'border-error' : 'border-border focus:border-accent'}`}
                 placeholder="Tu nombre"
@@ -95,7 +96,7 @@ export default function RegisterPage() {
               <input
                 type="email"
                 value={email}
-                onChange={(e) => { setEmail(e.target.value); setFieldErrors(f => ({ ...f, email: undefined })); }}
+                onChange={(e) => setEmail(e.target.value)}
                 className={`w-full px-4 py-3.5 bg-surface border rounded-[14px] text-text-primary placeholder-text-secondary/40 focus:outline-none focus:ring-2 focus:ring-accent/30 transition-all ${fieldErrors.email ? 'border-error' : 'border-border focus:border-accent'}`}
                 placeholder="tu@email.com"
               />
@@ -107,7 +108,7 @@ export default function RegisterPage() {
               <input
                 type="password"
                 value={password}
-                onChange={(e) => { setPassword(e.target.value); setFieldErrors(f => ({ ...f, password: undefined })); }}
+                onChange={(e) => setPassword(e.target.value)}
                 className={`w-full px-4 py-3.5 bg-surface border rounded-[14px] text-text-primary placeholder-text-secondary/40 focus:outline-none focus:ring-2 focus:ring-accent/30 transition-all ${fieldErrors.password ? 'border-error' : 'border-border focus:border-accent'}`}
                 placeholder="Mínimo 8 caracteres con letras y números"
               />
@@ -123,6 +124,9 @@ export default function RegisterPage() {
             <button type="submit" disabled={loading} className="w-full py-3.5 bg-accent hover:bg-accent-hover text-white font-semibold rounded-[14px] transition-colors disabled:opacity-50">
               {loading ? 'Creando cuenta...' : 'Crear cuenta'}
             </button>
+
+            {/* Social login */}
+            <SocialLoginButtons />
           </form>
 
           <p className="text-center mt-8 text-sm text-text-secondary">

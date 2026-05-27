@@ -58,7 +58,7 @@ export class GetMessagesUseCase {
       messages: result.map(m => ({
         messageId: m.id,
         userId: m.senderId,
-        username: m.sender.username,
+        username: m.sender.username || "Usuario",
         content: m.content,
         type: m.type,
         attachmentUrl: m.attachmentUrl,

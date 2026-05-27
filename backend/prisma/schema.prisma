@@ -10,8 +10,8 @@ datasource db {
 model User {
   id                    String   @id @default(uuid()) @db.Uuid
   email                 String   @unique @db.VarChar(255)
-  username              String   @db.VarChar(100)
-  passwordHash          String   @map("password_hash") @db.VarChar(255)
+  username              String?  @db.VarChar(100)
+  passwordHash          String?  @map("password_hash") @db.VarChar(255)
   language              String   @default("es") @db.VarChar(5)
   privacyModeActive     Boolean  @default(false) @map("privacy_mode_active")
   privacyModeExpiresAt  DateTime? @map("privacy_mode_expires_at")
@@ -26,6 +26,7 @@ model User {
   invitationsSent  Invitation[]     @relation("InvitationSender")
   refreshTokens    RefreshToken[]
   messagesSent     Message[]      @relation("MessageSender")
+  socialAccounts   SocialAccount[]
 
   @@map("users")
 }
@@ -159,3 +160,18 @@ model Message {
   @@map("messages")
 }
 
+
+model SocialAccount {
+  id         String   @id @default(uuid()) @db.Uuid
+  userId     String   @map("user_id") @db.Uuid
+  provider   String   @db.VarChar(20)
+  providerId String   @map("provider_id") @db.VarChar(255)
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerId])
+  @@unique([userId, provider])
+  @@index([userId])
+  @@map("social_accounts")
+}

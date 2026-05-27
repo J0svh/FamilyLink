@@ -62,7 +62,7 @@ export class SendMessageUseCase {
       messageId: message.id,
       circleId: message.circleId,
       userId: message.senderId,
-      username: user.username,
+      username: user.username || "Usuario",
       content: message.content,
       type: message.type,
       attachmentUrl: message.attachmentUrl,

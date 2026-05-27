@@ -2,13 +2,6 @@ import { Request, Response, NextFunction } from 'express';
 import { ITokenService, TokenPayload } from '../../../domain/ports/ITokenService';
 import { AppError } from '../../../shared/AppError';
 
-declare global {
-  namespace Express {
-    interface Request {
-      user?: TokenPayload;
-    }
-  }
-}
 
 export function createAuthMiddleware(tokenService: ITokenService) {
   return (req: Request, _res: Response, next: NextFunction): void => {

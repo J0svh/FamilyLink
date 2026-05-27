@@ -19,6 +19,11 @@ import { createChatRoutes } from './routes/chatRoutes';
 import { SendMessageUseCase } from '../../application/use-cases/chat/SendMessageUseCase';
 import { GetMessagesUseCase } from '../../application/use-cases/chat/GetMessagesUseCase';
 import { startCronJobs } from '../cron/cronJobs';
+import passport from 'passport';
+import { configureGoogleStrategy } from '../auth/passportGoogle';
+import { createSocialAuthRoutes } from './routes/socialAuthRoutes';
+import { SocialLoginUseCase } from '../../application/use-cases/auth/SocialLoginUseCase';
+import { PrismaSocialAccountRepository } from '../persistence/PrismaSocialAccountRepository';
 
 const app = express();
 const httpServer = createServer(app);
@@ -38,6 +43,11 @@ app.use(cors());
 app.use(compression());
 app.use(express.json());
 app.use(generalRateLimit);
+app.use(passport.initialize());
+
+// Configure Google OAuth
+const callbackBaseUrl = process.env.OAUTH_CALLBACK_BASE_URL || 'http://localhost:3000';
+configureGoogleStrategy(callbackBaseUrl);
 
 // Auth middleware factory
 const authMiddleware = createAuthMiddleware(container.tokenService);
