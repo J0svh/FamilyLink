@@ -15,9 +15,18 @@ interface AuthState {
   logout: () => void;
 }
 
+// Helper: save avatar per user so it survives logout
+function saveUserAvatar(userId: string, avatarId: string) {
+  localStorage.setItem(`familylink-avatar-${userId}`, avatarId);
+}
+
+function getUserAvatar(userId: string): string | null {
+  return localStorage.getItem(`familylink-avatar-${userId}`);
+}
+
 export const useAuthStore = create<AuthState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       accessToken: null,
       refreshToken: null,
       userId: null,
@@ -27,9 +36,22 @@ export const useAuthStore = create<AuthState>()(
       isAuthenticated: false,
       setTokens: (accessToken, refreshToken) =>
         set({ accessToken, refreshToken, isAuthenticated: true }),
-      setUser: (userId, email, username, avatarId) =>
-        set((state) => ({ userId, email, username, avatarId: avatarId || state.avatarId || null })),
-      setAvatarId: (avatarId) => set({ avatarId }),
+      setUser: (userId, email, username, avatarId) => {
+        // Restore avatar from per-user storage if not provided
+        const savedAvatar = getUserAvatar(userId);
+        const finalAvatar = avatarId || savedAvatar || get().avatarId || null;
+        if (finalAvatar && userId) {
+          saveUserAvatar(userId, finalAvatar);
+        }
+        set({ userId, email, username, avatarId: finalAvatar });
+      },
+      setAvatarId: (avatarId) => {
+        const userId = get().userId;
+        if (userId) {
+          saveUserAvatar(userId, avatarId);
+        }
+        set({ avatarId });
+      },
       logout: () =>
         set({
           accessToken: null,
