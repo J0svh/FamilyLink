@@ -336,6 +336,27 @@ export function CircleChat({ circleId, isOpen, onClose }: CircleChatProps) {
                                 <img src={msg.content} alt="GIF" className="max-w-[200px] rounded-[12px]" loading="lazy" />
                               ) : msg.type === 'photo' ? (
                                 <img src={msg.content} alt="Foto" className="max-w-[200px] rounded-[12px]" loading="lazy" />
+                              ) : msg.content.startsWith('📊') ? (
+                                <div className="min-w-[220px]">
+                                  {(() => {
+                                    const lines = msg.content.split('\n');
+                                    const question = lines[0].replace('📊 ', '');
+                                    const options = lines.slice(1);
+                                    return (
+                                      <>
+                                        <p className="text-[13px] font-semibold mb-2">{question}</p>
+                                        <div className="space-y-1.5">
+                                          {options.map((opt, idx) => (
+                                            <div key={idx} className={`px-3 py-2 rounded-[10px] text-[12px] ${isMe ? 'bg-white/15 hover:bg-white/25' : 'bg-accent/10 hover:bg-accent/20'} cursor-pointer transition-colors`}>
+                                              {opt}
+                                            </div>
+                                          ))}
+                                        </div>
+                                        <p className="text-[10px] opacity-60 mt-2">Encuesta</p>
+                                      </>
+                                    );
+                                  })()}
+                                </div>
                               ) : (
                                 <p className="text-[13px] leading-relaxed whitespace-pre-wrap break-words">{msg.content}</p>
                               )}

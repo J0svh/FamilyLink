@@ -28,7 +28,7 @@ export const useAuthStore = create<AuthState>()(
       setTokens: (accessToken, refreshToken) =>
         set({ accessToken, refreshToken, isAuthenticated: true }),
       setUser: (userId, email, username, avatarId) =>
-        set({ userId, email, username, avatarId: avatarId || null }),
+        set((state) => ({ userId, email, username, avatarId: avatarId || state.avatarId || null })),
       setAvatarId: (avatarId) => set({ avatarId }),
       logout: () =>
         set({
