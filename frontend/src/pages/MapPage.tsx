@@ -116,10 +116,7 @@ export default function MapPage() {
     return 'idle';
   }, [manualState, userId]);
 
-  // Center on user's location on first load
-  useEffect(() => {
-    centerOnMe();
-  }, []);
+
 
   const centerOnMe = () => {
     if (!navigator.geolocation) return;
@@ -131,19 +128,18 @@ export default function MapPage() {
           longitude: pos.coords.longitude,
           zoom: 15,
         });
-        const selfInMembers = members.find(m => m.userId === userId);
-        if (!selfInMembers || selfInMembers.latitude === 0) {
-          const updatedMembers = members.filter(m => m.userId !== userId);
-          updatedMembers.push({
-            userId: userId || '',
-            username: useAuthStore.getState().username || 'Tú',
-            latitude: pos.coords.latitude,
-            longitude: pos.coords.longitude,
-            capturedAt: new Date(0).toISOString(),
-            isPrivacyModeActive: false,
-          });
-          setMembers(updatedMembers);
-        }
+        // Always update self position in members using latest store state
+        const currentMembers = useMapStore.getState().members;
+        const updatedMembers = currentMembers.filter(m => m.userId !== userId);
+        updatedMembers.push({
+          userId: userId || '',
+          username: useAuthStore.getState().username || 'Tu',
+          latitude: pos.coords.latitude,
+          longitude: pos.coords.longitude,
+          capturedAt: new Date().toISOString(),
+          isPrivacyModeActive: false,
+        });
+        setMembers(updatedMembers);
       },
       () => {},
       { enableHighAccuracy: true },
@@ -154,7 +150,9 @@ export default function MapPage() {
   useSocket(circleId || null);
 
   useEffect(() => {
-    if (circleId) loadLocations();
+    if (circleId) {
+      loadLocations().then(() => centerOnMe());
+    }
   }, [circleId]);
 
   const loadLocations = async () => {
