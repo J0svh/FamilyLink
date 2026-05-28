@@ -340,7 +340,6 @@ export default function MapPage() {
         </div>
       </div>
 
-      {/* Right side — Zoom controls + center + 3D + Ghost + Heatmap */}
       <div className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 flex flex-col gap-1.5 sm:gap-2">
         <button
           onClick={() => setViewState({ zoom: (viewState.zoom || 13) + 1 })}

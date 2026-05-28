@@ -24,7 +24,6 @@ export { ChatThemePicker } from './ChatThemePicker';
 export { WeatherBadge } from './WeatherBadge';
 export { PhotoUpload } from './PhotoUpload';
 export { PollCreator } from './PollCreator';
-export { HeatmapLayer } from './HeatmapLayer';
 export { InviteModal } from './InviteModal';
 export { ZoneLayer } from './ZoneLayer';
 export { ZoneCreator } from './ZoneCreator';

@@ -15,7 +15,6 @@ const CHALLENGE_POOL: ChallengeDefinition[] = [
   { id: 'zone-1', emoji: '🗺️', title: 'Cartógrafo', description: 'Crea 1 zona nueva', target: 1, trackKey: 'zone', rewardEmoji: '📍', rewardName: 'Cartógrafo' },
   { id: 'arrived-2', emoji: '🏠', title: 'Seguro en casa', description: 'Usa "Llegué bien" 2 veces', target: 2, trackKey: 'arrived', rewardEmoji: '🏡', rewardName: 'Hogareño' },
   { id: 'ghost-1', emoji: '👻', title: 'Fantasma', description: 'Activa modo fantasma', target: 1, trackKey: 'ghost', rewardEmoji: '👻', rewardName: 'Fantasma' },
-  { id: 'heatmap-1', emoji: '🔥', title: 'Analista', description: 'Activa el mapa de calor', target: 1, trackKey: 'heatmap', rewardEmoji: '🔥', rewardName: 'Analista' },
   { id: 'center-3', emoji: '🎯', title: 'Centrado', description: 'Usa "centrar en mí" 3 veces', target: 3, trackKey: 'center', rewardEmoji: '🎯', rewardName: 'Centrado' },
   { id: 'poll-1', emoji: '📊', title: 'Encuestador', description: 'Crea 1 encuesta', target: 1, trackKey: 'poll', rewardEmoji: '📊', rewardName: 'Encuestador' },
   { id: 'darkmap-1', emoji: '🌙', title: 'Nocturno', description: 'Cambia al estilo nocturno', target: 1, trackKey: 'darkmap', rewardEmoji: '🌙', rewardName: 'Nocturno' },
