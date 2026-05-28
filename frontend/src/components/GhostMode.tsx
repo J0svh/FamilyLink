@@ -42,17 +42,17 @@ export function GhostMode({ isActive, onToggle }: GhostModeProps) {
       <AnimatePresence>
         {showConfirm && (
           <>
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setShowConfirm(false)} className="fixed inset-0 bg-black/40 z-50" />
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setShowConfirm(false)} className="fixed inset-0 bg-black/40 z-[100]" />
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
-              className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-surface rounded-[20px] shadow-2xl p-5 w-[calc(100vw-48px)] max-w-[300px] z-50"
+              className="fixed inset-x-4 top-1/2 -translate-y-1/2 mx-auto max-w-[280px] bg-surface rounded-[20px] shadow-2xl p-5 z-[100]"
             >
               <p className="text-3xl text-center mb-3">👻</p>
-              <h3 className="font-semibold text-text-primary text-center">Modo Fantasma</h3>
-              <p className="text-xs text-text-secondary text-center mt-2">
-                Serás invisible en el mapa sin que nadie reciba notificación. Nadie sabrá que lo activaste.
+              <h3 className="font-semibold text-text-primary text-center text-base">Modo Fantasma</h3>
+              <p className="text-xs text-text-secondary text-center mt-2 leading-relaxed">
+                Seras invisible en el mapa. Nadie recibira notificacion ni sabra que lo activaste.
               </p>
               <div className="flex gap-3 mt-5">
                 <button onClick={() => setShowConfirm(false)} className="flex-1 py-2.5 border border-border rounded-[10px] text-sm text-text-secondary">Cancelar</button>

@@ -19,7 +19,6 @@ import { DailyChallenges } from '../components/DailyChallenges';
 import { ArrivedSafe } from '../components/ArrivedSafe';
 import { WeatherBadge } from '../components/WeatherBadge';
 import { BatteryIndicator } from '../components/BatteryIndicator';
-import { HeatmapLayer } from '../components/HeatmapLayer';
 import { AvatarSelector } from '../components/AvatarSelector';
 import { ToastContainer } from '../components/Toast';
 import { ZoneLayer } from '../components/ZoneLayer';
@@ -50,7 +49,6 @@ export default function MapPage() {
   const [showDailyChallenges, setShowDailyChallenges] = useState(false);
   const [showAvatarSelector, setShowAvatarSelector] = useState(false);
   const [ghostMode, setGhostMode] = useState(false);
-  const [showHeatmap, setShowHeatmap] = useState(false);
   const [showZoneCreator, setShowZoneCreator] = useState(false);
   const [zonePoint, setZonePoint] = useState<{ lat: number; lng: number } | null>(null);
   const [zoneRefreshKey, setZoneRefreshKey] = useState(0);
@@ -89,12 +87,7 @@ export default function MapPage() {
       };
     });
 
-  /**
-   * Generate heatmap points from member locations
-   */
-  const heatmapPoints = members
-    .filter(m => m.latitude !== 0)
-    .map(m => ({ latitude: m.latitude, longitude: m.longitude, weight: 1 }));
+
 
   /**
    * Determine avatar state. Manual state takes priority.
@@ -258,8 +251,6 @@ export default function MapPage() {
           </Source>
         )}
 
-        {/* Heatmap layer */}
-        <HeatmapLayer points={heatmapPoints} visible={showHeatmap} />
 
         {/* Member avatars */}
         {members
@@ -389,15 +380,6 @@ export default function MapPage() {
 
         {/* Ghost Mode toggle */}
         <GhostMode isActive={ghostMode} onToggle={(active) => { setGhostMode(active); if (active) incrementChallenge('ghost'); }} />
-
-        {/* Heatmap toggle */}
-        <button
-          onClick={() => { setShowHeatmap(!showHeatmap); if (!showHeatmap) incrementChallenge('heatmap'); }}
-          className={`bg-surface/90 backdrop-blur-md rounded-[10px] sm:rounded-[12px] w-9 h-9 sm:w-10 sm:h-10 shadow-lg flex items-center justify-center transition-all border border-border/50 ${showHeatmap ? 'text-accent' : 'text-text-secondary'}`}
-          title="Mapa de calor"
-        >
-          🔥
-        </button>
       </div>
 
       {/* Bottom action bar — horizontal scroll carousel */}
