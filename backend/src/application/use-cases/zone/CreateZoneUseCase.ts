@@ -25,8 +25,8 @@ export class CreateZoneUseCase {
     if (!circle) {
       throw AppError.notFound('Circle not found');
     }
-    if (!circle.isAdmin(userId)) {
-      throw AppError.forbidden('Only circle admins can create zones');
+    if (!circle.isMember(userId)) {
+      throw AppError.forbidden('Only circle members can create zones');
     }
 
     // Check max zones per circle (20)

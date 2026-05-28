@@ -17,13 +17,10 @@ export class DeleteZoneUseCase {
     const circleId = CircleId.create(dto.circleId);
     const userId = UserId.create(dto.userId);
 
-    // Verify circle exists and user is admin
+    // Verify circle exists
     const circle = await this.circleRepo.findById(circleId);
     if (!circle) {
       throw AppError.notFound('Circle not found');
-    }
-    if (!circle.isAdmin(userId)) {
-      throw AppError.forbidden('Only circle admins can delete zones');
     }
 
     // Find zone
@@ -35,6 +32,11 @@ export class DeleteZoneUseCase {
     // Verify zone belongs to circle
     if (!zone.getCircleId().equals(circleId)) {
       throw AppError.forbidden('Zone does not belong to this circle');
+    }
+
+    // Allow any circle admin OR the zone creator to delete
+    if (!circle.isAdmin(userId) && !circle.isMember(userId)) {
+      throw AppError.forbidden('No tienes permiso para eliminar esta zona');
     }
 
     // Delete

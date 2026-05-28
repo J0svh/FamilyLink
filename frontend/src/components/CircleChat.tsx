@@ -63,6 +63,21 @@ export function CircleChat({ circleId, isOpen, onClose }: CircleChatProps) {
     if (isOpen && circleId) loadMessages();
   }, [isOpen, circleId]);
 
+  // Poll for new messages every 5s when chat is open (catches polls, other users' messages)
+  useEffect(() => {
+    if (!isOpen || !circleId) return;
+    const interval = setInterval(async () => {
+      try {
+        const { data } = await api.get(`/chat/circles/${circleId}/messages`);
+        if (data.messages && data.messages.length > messages.length) {
+          setMessages(data.messages);
+          localStorage.setItem(`familylink-chat-${circleId}`, JSON.stringify(data.messages));
+        }
+      } catch { /* silent */ }
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [isOpen, circleId, messages.length]);
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);

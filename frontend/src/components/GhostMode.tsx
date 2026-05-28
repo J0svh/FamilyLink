@@ -47,7 +47,7 @@ export function GhostMode({ isActive, onToggle }: GhostModeProps) {
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
-              className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-surface rounded-[20px] shadow-2xl p-6 w-[300px] z-50"
+              className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-surface rounded-[20px] shadow-2xl p-5 w-[calc(100vw-48px)] max-w-[300px] z-50"
             >
               <p className="text-3xl text-center mb-3">👻</p>
               <h3 className="font-semibold text-text-primary text-center">Modo Fantasma</h3>
