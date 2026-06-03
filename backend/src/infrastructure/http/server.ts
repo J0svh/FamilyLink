@@ -29,9 +29,15 @@ const app = express();
 app.set('trust proxy', 1);
 const httpServer = createServer(app);
 
-// Socket.IO setup
+// Socket.IO setup — allow Vercel frontend and local dev
+const allowedOrigins = [
+  process.env.FRONTEND_URL || 'http://localhost:5173',
+  'http://localhost:5173',
+  'http://localhost:4173',
+  'https://family-link-rosy.vercel.app',
+];
 const io = new SocketIOServer(httpServer, {
-  cors: { origin: '*', methods: ['GET', 'POST'] },
+  cors: { origin: allowedOrigins, methods: ['GET', 'POST'] },
   path: '/ws',
 });
 
@@ -40,7 +46,23 @@ const container = createContainer(io);
 
 // Global middleware
 app.use(helmet());
-app.use(cors());
+app.use(cors({
+  origin: (origin, callback) => {
+    const allowedOrigins = [
+      process.env.FRONTEND_URL || 'http://localhost:5173',
+      'http://localhost:5173',
+      'http://localhost:4173',
+      'https://family-link-rosy.vercel.app',
+    ];
+    // Allow requests with no origin (mobile apps, curl, Postman)
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error(`CORS: origin ${origin} not allowed`));
+    }
+  },
+  credentials: true,
+}));
 app.use(compression());
 app.use(express.json());
 app.use(generalRateLimit);
@@ -64,6 +86,7 @@ app.use('/api/v1/auth', createAuthRoutes(
   container.loginUserUseCase,
   container.refreshTokenUseCase,
   container.logoutUseCase,
+  container.tokenService,
 ));
 
 // Protected routes
