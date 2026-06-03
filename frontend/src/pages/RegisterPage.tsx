@@ -124,10 +124,10 @@ export default function RegisterPage() {
             <button type="submit" disabled={loading} className="w-full py-3.5 bg-accent hover:bg-accent-hover text-white font-semibold rounded-[14px] transition-colors disabled:opacity-50">
               {loading ? 'Creando cuenta...' : 'Crear cuenta'}
             </button>
-
-            {/* Social login */}
-            <SocialLoginButtons />
           </form>
+
+          {/* Social login — outside form to avoid submit trigger */}
+          <SocialLoginButtons />
 
           <p className="text-center mt-8 text-sm text-text-secondary">
             ¿Ya tienes cuenta?{' '}

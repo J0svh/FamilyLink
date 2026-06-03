@@ -20,6 +20,7 @@ export function SocialLoginButtons({ className = '' }: SocialLoginButtonsProps) 
 
       {/* Google button */}
       <button
+        type="button"
         onClick={handleGoogleLogin}
         className="w-full flex items-center justify-center gap-3 py-3.5 bg-white border border-border rounded-[14px] font-medium text-[#1f1f1f] hover:bg-gray-50 transition-colors shadow-sm"
         aria-label="Continuar con Google"
