@@ -142,7 +142,9 @@ io.on('connection', (socket) => {
   logger.debug({ socketId: socket.id, userId }, 'Client connected');
 
   if (userId) {
+    // Add to online tracker and user-specific room for notifications
     onlineTracker.addConnection(userId, socket.id);
+    socket.join(`user:${userId}`); // Join user-specific room for invitations and notifications
   }
 
   socket.on('join:circle', (circleId: string) => {

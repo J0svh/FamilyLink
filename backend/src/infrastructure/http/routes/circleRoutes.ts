@@ -95,29 +95,14 @@ export function createCircleRoutes(
     res.json(result);
   }));
 
+  // Specific routes MUST come before parameterized ones to avoid conflicts
   // GET pending invitations for current user
   router.get('/invitations/pending', asyncHandler(async (req, res) => {
     const result = await getPendingInvitationsUseCase.execute(req.user!.userId);
     res.json(result);
   }));
 
-  router.post('/', validate(createCircleSchema), asyncHandler(async (req, res) => {
-    const result = await createCircleUseCase.execute({
-      name: req.body.name,
-      userId: req.user!.userId,
-    });
-    res.status(201).json(result);
-  }));
-
-  router.post('/:circleId/invitations', validate(inviteMemberSchema), asyncHandler(async (req, res) => {
-    const result = await inviteMemberUseCase.execute({
-      circleId: req.params.circleId,
-      invitedByUserId: req.user!.userId,
-      email: req.body.email,
-    });
-    res.status(201).json(result);
-  }));
-
+  // POST accept invitation (must come before /:circleId routes)
   router.post('/invitations/:invitationId/accept', validate(acceptInvitationSchema), asyncHandler(async (req, res) => {
     const result = await acceptInvitationUseCase.execute({
       invitationId: req.params.invitationId,
@@ -126,13 +111,32 @@ export function createCircleRoutes(
     res.json(result);
   }));
 
-  // POST reject invitation
+  // POST reject invitation (must come before /:circleId routes)
   router.post('/invitations/:invitationId/reject', validate(rejectInvitationSchema), asyncHandler(async (req, res) => {
     await rejectInvitationUseCase.execute({
       invitationId: req.params.invitationId,
       userId: req.user!.userId,
     });
     res.status(204).send();
+  }));
+
+  // Generic POST create circle
+  router.post('/', validate(createCircleSchema), asyncHandler(async (req, res) => {
+    const result = await createCircleUseCase.execute({
+      name: req.body.name,
+      userId: req.user!.userId,
+    });
+    res.status(201).json(result);
+  }));
+
+  // Parameterized routes (/:circleId/...) come after specific ones
+  router.post('/:circleId/invitations', validate(inviteMemberSchema), asyncHandler(async (req, res) => {
+    const result = await inviteMemberUseCase.execute({
+      circleId: req.params.circleId,
+      invitedByUserId: req.user!.userId,
+      email: req.body.email,
+    });
+    res.status(201).json(result);
   }));
 
   // GET circle members

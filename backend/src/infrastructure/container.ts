@@ -120,7 +120,7 @@ export function createContainer(io: SocketIOServer | null = null): Container {
   const passwordHasher = new BcryptPasswordHasher();
   const locationCache = new UpstashLocationCache(null);
   const notificationService = new FCMNotificationAdapter();
-  const eventPublisher = new SocketIOEventPublisher(io);
+  const eventPublisher = new SocketIOEventPublisher(io, userRepo);
   const onlineTracker = new OnlineTracker();
 
   // Use Cases - Auth

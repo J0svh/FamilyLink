@@ -1,5 +1,6 @@
 import { Server as SocketIOServer } from 'socket.io';
 import { IEventPublisher } from '../../domain/ports/IEventPublisher';
+import { IUserRepository } from '../../domain/ports/IUserRepository';
 import { DomainEvent } from '../../domain/events/DomainEvent';
 import { LocationShared } from '../../domain/events/LocationShared';
 import { ZoneEntered } from '../../domain/events/ZoneEntered';
@@ -11,7 +12,10 @@ import { MemberInvited } from '../../domain/events/MemberInvited';
 import { logger } from '../../shared/logger';
 
 export class SocketIOEventPublisher implements IEventPublisher {
-  constructor(private readonly io: SocketIOServer | null) {}
+  constructor(
+    private readonly io: SocketIOServer | null,
+    private readonly userRepo?: IUserRepository,
+  ) {}
 
   async publish(event: DomainEvent): Promise<void> {
     if (!this.io) {
@@ -20,7 +24,7 @@ export class SocketIOEventPublisher implements IEventPublisher {
     }
 
     try {
-      const { room, eventType, payload } = this.mapEvent(event);
+      const { room, eventType, payload } = await this.mapEvent(event);
 
       if (room && eventType) {
         this.io.to(room).emit(eventType, payload);
@@ -31,7 +35,7 @@ export class SocketIOEventPublisher implements IEventPublisher {
     }
   }
 
-  private mapEvent(event: DomainEvent): { room: string | null; eventType: string | null; payload: any } {
+  private async mapEvent(event: DomainEvent): Promise<{ room: string | null; eventType: string | null; payload: any }> {
     if (event instanceof LocationShared) {
       return {
         room: `circle:${event.circleId.getValue()}`,
@@ -99,12 +103,29 @@ export class SocketIOEventPublisher implements IEventPublisher {
     }
 
     if (event instanceof MemberInvited) {
+      // For invitation events, emit to user-specific room if available
+      // This way the invited user gets notified even before accepting
+      let userRoom = null;
+      
+      // Try to find user by email to get their userId
+      if (this.userRepo) {
+        try {
+          const user = await this.userRepo.findByEmail(event.email);
+          if (user) {
+            userRoom = `user:${user.getId().getValue()}`;
+          }
+        } catch (err) {
+          logger.debug({ email: event.email.getValue() }, 'Could not find user for invitation notification');
+        }
+      }
+
       return {
-        room: `circle:${event.circleId.getValue()}`,
-        eventType: 'member:invited',
+        room: userRoom || `circle:${event.circleId.getValue()}`,
+        eventType: 'invitation:new',
         payload: {
           email: event.email.getValue(),
           invitationId: event.invitationId.getValue(),
+          circleId: event.circleId.getValue(),
         },
       };
     }

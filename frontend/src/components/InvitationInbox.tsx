@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { api } from '../lib/api';
 import { useAuthStore } from '../stores/authStore';
 
-const INVITATION_POLL_MS = 5000;
+const INVITATION_POLL_MS = 2000; // Reducido a 2 segundos para respuesta más rápida
 
 interface Invitation {
   invitationId: string;
@@ -22,8 +22,10 @@ export function InvitationInbox({ onCircleAdded }: InvitationInboxProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [loadingId, setLoadingId] = useState<string | null>(null);
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const userId = useAuthStore((s) => s.userId);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const lastInvitationIds = useRef<Set<string>>(new Set());
+  const socketRef = useRef<any>(null);
 
   const fetchInvitations = useCallback(async (openOnNewInvitation = false) => {
     try {
@@ -47,7 +49,7 @@ export function InvitationInbox({ onCircleAdded }: InvitationInboxProps) {
   }, []);
 
   useEffect(() => {
-    if (!isAuthenticated) {
+    if (!isAuthenticated || !userId) {
       setInvitations([]);
       lastInvitationIds.current = new Set();
       return;
@@ -55,6 +57,29 @@ export function InvitationInbox({ onCircleAdded }: InvitationInboxProps) {
 
     fetchInvitations();
 
+    // WebSocket listener for real-time invitation updates
+    try {
+      const io = (window as any).io;
+      if (io && !socketRef.current) {
+        socketRef.current = io(import.meta.env.VITE_API_URL || 'http://localhost:3000', {
+          auth: { userId },
+          path: '/ws',
+        });
+
+        socketRef.current.on('invitation:new', () => {
+          console.debug('New invitation received via WebSocket');
+          fetchInvitations(true);
+        });
+
+        socketRef.current.on('connect', () => {
+          console.debug('WebSocket connected for invitations');
+        });
+      }
+    } catch (err) {
+      console.debug('WebSocket not available, using polling only', err);
+    }
+
+    // Polling as fallback (every 2 seconds when visible)
     const intervalId = window.setInterval(() => {
       if (document.visibilityState === 'visible') {
         fetchInvitations(true);
@@ -75,7 +100,7 @@ export function InvitationInbox({ onCircleAdded }: InvitationInboxProps) {
       window.removeEventListener('focus', refreshWhenVisible);
       document.removeEventListener('visibilitychange', refreshWhenVisible);
     };
-  }, [fetchInvitations, isAuthenticated]);
+  }, [fetchInvitations, isAuthenticated, userId]);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
