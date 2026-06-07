@@ -1,15 +1,20 @@
 import { ICircleRepository } from '../../../domain/ports/ICircleRepository';
 import { IInvitationRepository } from '../../../domain/ports/IInvitationRepository';
+import { IUserRepository } from '../../../domain/ports/IUserRepository';
 import { InvitationId } from '../../../domain/value-objects/InvitationId';
 import { UserId } from '../../../domain/value-objects/UserId';
 import { CircleRole } from '../../../domain/aggregates/circle/CircleRole';
-import { AcceptInvitationInputDTO, AcceptInvitationOutputDTO } from '../../dtos/circle/AcceptInvitationDTO';
+import {
+  AcceptInvitationInputDTO,
+  AcceptInvitationOutputDTO,
+} from '../../dtos/circle/AcceptInvitationDTO';
 import { AppError } from '../../../shared/AppError';
 
 export class AcceptInvitationUseCase {
   constructor(
     private readonly circleRepo: ICircleRepository,
     private readonly invitationRepo: IInvitationRepository,
+    private readonly userRepo?: IUserRepository,
   ) {}
 
   async execute(dto: AcceptInvitationInputDTO): Promise<AcceptInvitationOutputDTO> {
@@ -20,6 +25,13 @@ export class AcceptInvitationUseCase {
     const invitation = await this.invitationRepo.findById(invitationId);
     if (!invitation) {
       throw AppError.notFound('Invitation not found');
+    }
+
+    if (this.userRepo) {
+      const user = await this.userRepo.findById(userId);
+      if (!user || !user.getEmail().equals(invitation.getEmail())) {
+        throw AppError.forbidden('This invitation is for another user');
+      }
     }
 
     // Accept invitation (validates pending status and expiry)

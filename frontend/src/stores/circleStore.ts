@@ -23,7 +23,12 @@ export const useCircleStore = create<CircleState>()(
       activeCircleId: null,
       setCircles: (circles) => set({ circles }),
       setActiveCircle: (circleId) => set({ activeCircleId: circleId }),
-      addCircle: (circle) => set((state) => ({ circles: [...state.circles, circle] })),
+      addCircle: (circle) =>
+        set((state) => ({
+          circles: state.circles.some((c) => c.circleId === circle.circleId)
+            ? state.circles.map((c) => (c.circleId === circle.circleId ? circle : c))
+            : [...state.circles, circle],
+        })),
       removeCircle: (circleId) =>
         set((state) => ({ circles: state.circles.filter((c) => c.circleId !== circleId) })),
     }),

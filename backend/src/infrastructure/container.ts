@@ -124,27 +124,60 @@ export function createContainer(io: SocketIOServer | null = null): Container {
   const onlineTracker = new OnlineTracker();
 
   // Use Cases - Auth
-  const registerUserUseCase = new RegisterUserUseCase(userRepo, refreshTokenRepo, tokenService, passwordHasher);
-  const loginUserUseCase = new LoginUserUseCase(userRepo, refreshTokenRepo, tokenService, passwordHasher);
+  const registerUserUseCase = new RegisterUserUseCase(
+    userRepo,
+    refreshTokenRepo,
+    tokenService,
+    passwordHasher,
+  );
+  const loginUserUseCase = new LoginUserUseCase(
+    userRepo,
+    refreshTokenRepo,
+    tokenService,
+    passwordHasher,
+  );
   const refreshTokenUseCase = new RefreshTokenUseCase(refreshTokenRepo, tokenService, userRepo);
   const logoutUseCase = new LogoutUseCase(refreshTokenRepo);
 
   // Use Cases - Circle
   const createCircleUseCase = new CreateCircleUseCase(circleRepo, eventPublisher);
   const inviteMemberUseCase = new InviteMemberUseCase(circleRepo, invitationRepo, eventPublisher);
-  const acceptInvitationUseCase = new AcceptInvitationUseCase(circleRepo, invitationRepo);
-  const dissolveCircleUseCase = new DissolveCircleUseCase(circleRepo, zoneRepo, invitationRepo, notificationService);
+  const acceptInvitationUseCase = new AcceptInvitationUseCase(circleRepo, invitationRepo, userRepo);
+  const dissolveCircleUseCase = new DissolveCircleUseCase(
+    circleRepo,
+    zoneRepo,
+    invitationRepo,
+    notificationService,
+  );
   const removeMemberUseCase = new RemoveMemberUseCase(circleRepo);
   const updateMemberRoleUseCase = new UpdateMemberRoleUseCase(circleRepo);
-  const updateDailyLimitsUseCase = new UpdateDailyLimitsUseCase(circleRepo, { save: async () => {}, findByUserAndCircle: async () => null });
+  const updateDailyLimitsUseCase = new UpdateDailyLimitsUseCase(circleRepo, {
+    save: async () => {},
+    findByUserAndCircle: async () => null,
+  });
   const getUserCirclesUseCase = new GetUserCirclesUseCase(circleRepo);
-  const getPendingInvitationsUseCase = new GetPendingInvitationsUseCase(invitationRepo, circleRepo, userRepo);
+  const getPendingInvitationsUseCase = new GetPendingInvitationsUseCase(
+    invitationRepo,
+    circleRepo,
+    userRepo,
+  );
   const rejectInvitationUseCase = new RejectInvitationUseCase(invitationRepo, userRepo);
   const getCircleMembersUseCase = new GetCircleMembersUseCase(circleRepo, userRepo, onlineTracker);
 
   // Use Cases - Location
-  const shareLocationUseCase = new ShareLocationUseCase(userRepo, circleRepo, locationRepo, zoneRepo, locationCache, eventPublisher);
-  const getCircleLocationsUseCase = new GetCircleLocationsUseCase(circleRepo, locationRepo, userRepo);
+  const shareLocationUseCase = new ShareLocationUseCase(
+    userRepo,
+    circleRepo,
+    locationRepo,
+    zoneRepo,
+    locationCache,
+    eventPublisher,
+  );
+  const getCircleLocationsUseCase = new GetCircleLocationsUseCase(
+    circleRepo,
+    locationRepo,
+    userRepo,
+  );
 
   // Use Cases - Zone
   const createZoneUseCase = new CreateZoneUseCase(circleRepo, zoneRepo);
@@ -153,18 +186,48 @@ export function createContainer(io: SocketIOServer | null = null): Container {
   const getZonesByCircleUseCase = new GetZonesByCircleUseCase(circleRepo, zoneRepo);
 
   // Use Cases - Privacy
-  const activatePrivacyModeUseCase = new ActivatePrivacyModeUseCase(userRepo, circleRepo, eventPublisher);
+  const activatePrivacyModeUseCase = new ActivatePrivacyModeUseCase(
+    userRepo,
+    circleRepo,
+    eventPublisher,
+  );
   const deactivatePrivacyModeUseCase = new DeactivatePrivacyModeUseCase(userRepo, eventPublisher);
 
   return {
-    userRepo, circleRepo, zoneRepo, locationRepo, invitationRepo, refreshTokenRepo,
-    tokenService, passwordHasher, locationCache, notificationService, eventPublisher, onlineTracker,
-    registerUserUseCase, loginUserUseCase, refreshTokenUseCase, logoutUseCase,
-    createCircleUseCase, inviteMemberUseCase, acceptInvitationUseCase, dissolveCircleUseCase,
-    removeMemberUseCase, updateMemberRoleUseCase, updateDailyLimitsUseCase, getUserCirclesUseCase,
-    getPendingInvitationsUseCase, rejectInvitationUseCase, getCircleMembersUseCase,
-    shareLocationUseCase, getCircleLocationsUseCase,
-    createZoneUseCase, updateZoneUseCase, deleteZoneUseCase, getZonesByCircleUseCase,
-    activatePrivacyModeUseCase, deactivatePrivacyModeUseCase,
+    userRepo,
+    circleRepo,
+    zoneRepo,
+    locationRepo,
+    invitationRepo,
+    refreshTokenRepo,
+    tokenService,
+    passwordHasher,
+    locationCache,
+    notificationService,
+    eventPublisher,
+    onlineTracker,
+    registerUserUseCase,
+    loginUserUseCase,
+    refreshTokenUseCase,
+    logoutUseCase,
+    createCircleUseCase,
+    inviteMemberUseCase,
+    acceptInvitationUseCase,
+    dissolveCircleUseCase,
+    removeMemberUseCase,
+    updateMemberRoleUseCase,
+    updateDailyLimitsUseCase,
+    getUserCirclesUseCase,
+    getPendingInvitationsUseCase,
+    rejectInvitationUseCase,
+    getCircleMembersUseCase,
+    shareLocationUseCase,
+    getCircleLocationsUseCase,
+    createZoneUseCase,
+    updateZoneUseCase,
+    deleteZoneUseCase,
+    getZonesByCircleUseCase,
+    activatePrivacyModeUseCase,
+    deactivatePrivacyModeUseCase,
   };
 }
