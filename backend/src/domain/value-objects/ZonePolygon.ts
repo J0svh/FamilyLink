@@ -49,7 +49,7 @@ export class ZonePolygon {
     const area = ZonePolygon.calculateAreaSqm(vertices);
 
     if (area < 100) {
-      throw new Error(`Polygon area must be at least 100 m2, got: ${area.toFixed(2)} m2`);
+      throw new Error(`Polygon area must be at least 100 m², got: ${area.toFixed(2)} m²`);
     }
 
     return new ZonePolygon([...vertices], area);
@@ -75,7 +75,7 @@ export class ZonePolygon {
   }
 
   toString(): string {
-    return `ZonePolygon(${this.vertices.length} vertices, ${this.areaSqm.toFixed(0)} m2)`;
+    return `ZonePolygon(${this.vertices.length} vertices, ${this.areaSqm.toFixed(0)} m²)`;
   }
 
   /**
