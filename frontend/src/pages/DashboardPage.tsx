@@ -11,6 +11,7 @@ import { MemberDrawer } from '../components/MemberDrawer';
 import { CircleChat } from '../components/CircleChat';
 import { ToastContainer } from '../components/Toast';
 import { OnboardingTutorial, DASHBOARD_ONBOARDING_STEPS } from '../components/OnboardingTutorial';
+import { BrandMark } from '../components/BrandMark';
 
 export default function DashboardPage() {
   const { t } = useTranslation();
@@ -83,15 +84,15 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0f0c29] via-[#302b63] to-[#24243e]">
       <ToastContainer />
-      <OnboardingTutorial steps={DASHBOARD_ONBOARDING_STEPS} storageKey="familylink-onboarding-dashboard-done" />
+      <OnboardingTutorial
+        steps={DASHBOARD_ONBOARDING_STEPS}
+        storageKey="familylink-onboarding-dashboard-done"
+      />
 
       {/* Header */}
       <header className="px-6 py-5">
         <div className="max-w-2xl mx-auto flex items-center justify-between">
-          <div>
-            <h1 className="text-xl font-bold text-white">FamilyLink</h1>
-            <p className="text-sm text-white/60">Hola, {username} &#x1f44b;</p>
-          </div>
+          <BrandMark variant="dark" size="md" subtitle={`Hola, ${username}`} />
           <div className="flex items-center gap-3">
             <InvitationInbox onCircleAdded={handleCircleAdded} />
             <button
@@ -118,14 +119,28 @@ export default function DashboardPage() {
 
         {/* Circle list */}
         {circles.length === 0 ? (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-20">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="text-center py-20"
+          >
             <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5" opacity="0.5">
-                <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/>
+              <svg
+                width="32"
+                height="32"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="white"
+                strokeWidth="1.5"
+                opacity="0.5"
+              >
+                <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
+                <circle cx="9" cy="7" r="4" />
+                <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" />
               </svg>
             </div>
             <p className="text-white/70 text-base">{t('dashboard.noCircles')}</p>
-            <p className="text-white/40 text-sm mt-2">Crea un c&#xed;rculo para empezar</p>
+            <p className="text-white/40 text-sm mt-2">Crea un círculo para empezar</p>
           </motion.div>
         ) : (
           <div className="space-y-3">
@@ -138,10 +153,13 @@ export default function DashboardPage() {
                 className="bg-white/5 backdrop-blur-sm rounded-[16px] border border-white/10 p-5 hover:bg-white/10 transition-all group"
               >
                 <div className="flex items-center justify-between">
-                  <button onClick={() => handleCircleClick(circle.circleId)} className="flex-1 text-left">
+                  <button
+                    onClick={() => handleCircleClick(circle.circleId)}
+                    className="flex-1 text-left"
+                  >
                     <h3 className="font-medium text-white">{circle.name}</h3>
                     <p className="text-sm text-white/50 mt-0.5">
-                      {circle.role === 'CIRCLE_ADMIN' ? '&#x1f451; Admin' : 'Miembro'}
+                      {circle.role === 'CIRCLE_ADMIN' ? 'Admin' : 'Miembro'}
                     </p>
                   </button>
 
@@ -150,11 +168,21 @@ export default function DashboardPage() {
                     {circle.role === 'CIRCLE_ADMIN' && (
                       <button
                         onClick={() => openInvite(circle.circleId)}
-                        className="w-9 h-9 flex items-center justify-center rounded-full bg-white/10 hover:bg-accent/20 transition-colors opacity-0 group-hover:opacity-100"
+                        className="w-10 h-10 sm:w-9 sm:h-9 flex items-center justify-center rounded-full bg-white/10 hover:bg-accent/20 transition-colors sm:opacity-0 sm:group-hover:opacity-100"
                         title="Invitar miembro"
                       >
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5">
-                          <path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/>
+                        <svg
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="white"
+                          strokeWidth="1.5"
+                        >
+                          <path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
+                          <circle cx="8.5" cy="7" r="4" />
+                          <line x1="20" y1="8" x2="20" y2="14" />
+                          <line x1="23" y1="11" x2="17" y2="11" />
                         </svg>
                       </button>
                     )}
@@ -165,8 +193,15 @@ export default function DashboardPage() {
                       className="w-9 h-9 flex items-center justify-center rounded-full bg-accent/20 hover:bg-accent/30 transition-colors"
                       title="Ver mapa"
                     >
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
-                        <path d="M5 12h14M12 5l7 7-7 7"/>
+                      <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="white"
+                        strokeWidth="2"
+                      >
+                        <path d="M5 12h14M12 5l7 7-7 7" />
                       </svg>
                     </button>
                   </div>
@@ -185,21 +220,34 @@ export default function DashboardPage() {
             animate={{ opacity: 1, scale: 1 }}
             className="bg-surface rounded-[20px] shadow-2xl p-6 w-full max-w-sm"
           >
-            <h3 className="text-lg font-semibold text-text-primary mb-4">{t('dashboard.createCircle')}</h3>
+            <h3 className="text-lg font-semibold text-text-primary mb-4">
+              {t('dashboard.createCircle')}
+            </h3>
             <form onSubmit={handleCreateCircle}>
               <input
                 type="text"
                 value={newCircleName}
                 onChange={(e) => setNewCircleName(e.target.value)}
-                placeholder="Nombre del c&#xed;rculo"
+                placeholder="Nombre del círculo"
                 required
                 maxLength={100}
                 className="w-full px-4 py-3 bg-background border border-border rounded-[12px] text-text-primary focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent"
                 autoFocus
               />
               <div className="flex gap-3 mt-5">
-                <button type="button" onClick={() => setShowCreateModal(false)} className="flex-1 py-2.5 border border-border rounded-[10px] text-text-secondary font-medium">Cancelar</button>
-                <button type="submit" className="flex-1 py-2.5 bg-accent hover:bg-accent-hover text-white rounded-[10px] font-medium">Crear</button>
+                <button
+                  type="button"
+                  onClick={() => setShowCreateModal(false)}
+                  className="flex-1 py-2.5 border border-border rounded-[10px] text-text-secondary font-medium"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 py-2.5 bg-accent hover:bg-accent-hover text-white rounded-[10px] font-medium"
+                >
+                  Crear
+                </button>
               </div>
             </form>
           </motion.div>

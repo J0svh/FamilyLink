@@ -382,8 +382,8 @@ export default function MapPage() {
       </div>
 
       {/* Bottom action bar — horizontal scroll carousel */}
-      <div className="absolute bottom-5 left-0 right-0 pb-[env(safe-area-inset-bottom,0px)] sm:bottom-6 sm:left-4 sm:right-4">
-        <div className="flex items-center gap-2 sm:gap-3 overflow-x-auto scrollbar-hide px-3 sm:px-0 pb-1 sm:justify-center">
+      <div className="absolute bottom-[calc(env(safe-area-inset-bottom,0px)+2rem)] left-0 right-0 sm:bottom-6 sm:left-4 sm:right-4">
+        <div className="flex items-center gap-2 sm:gap-3 overflow-x-auto scrollbar-hide px-3 pb-1 sm:px-0 sm:justify-center touch-pan-x">
           {/* Status button */}
           <motion.button
             whileTap={{ scale: 0.9 }}
