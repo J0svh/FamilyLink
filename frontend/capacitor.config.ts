@@ -6,14 +6,11 @@ const config: CapacitorConfig = {
   webDir: 'dist',
   server: {
     androidScheme: 'https',
-    // Use the deployed URL so the app works without a local server
     url: 'https://family-link-rosy.vercel.app',
     cleartext: false,
   },
   plugins: {
-    Geolocation: {
-      // Request precise location
-    },
+    Geolocation: {},
     StatusBar: {
       style: 'dark',
       backgroundColor: '#0f0c29',

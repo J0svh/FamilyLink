@@ -1,0 +1,1300 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FamilyLink — Mi TFG (con cariño y algo de IA)</title>
+  <link rel="icon" type="image/png" href="presentacion-assets/favicon-96x96.png" sizes="96x96" />
+  <link rel="apple-touch-icon" href="presentacion-assets/apple-touch-icon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #FAFAFA;
+      --bg-secondary: #F5F5F7;
+      --surface: #FFFFFF;
+      --accent: #007AFF;
+      --accent-hover: #0056CC;
+      --success: #34C759;
+      --purple: #AF52DE;
+      --text: #1C1C1E;
+      --text-secondary: #86868B;
+      --border: #E5E5EA;
+      --hero-1: #0f0c29;
+      --hero-2: #302b63;
+      --hero-3: #24243e;
+      --gradient-hero: linear-gradient(135deg, var(--hero-1) 0%, var(--hero-2) 50%, var(--hero-3) 100%);
+      --gradient-brand: linear-gradient(135deg, var(--accent) 0%, #5856D6 100%);
+      --shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+      --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.12);
+      --radius: 20px;
+      --radius-lg: 24px;
+      --slide-padding: clamp(1.5rem, 4vw, 3.5rem);
+      --brand-h: 64px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html {
+      scroll-behavior: smooth;
+      scroll-snap-type: y mandatory;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      color: var(--text);
+      background: var(--bg);
+    }
+
+    /* ── Brand bar (fixed) ── */
+    .brand-bar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: var(--brand-h);
+      z-index: 1001;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 1.25rem;
+      background: rgba(15, 12, 41, 0.88);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .brand-logo {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      text-decoration: none;
+      color: #fff;
+    }
+
+    .brand-logo img { width: 38px; height: 38px; flex-shrink: 0; object-fit: contain; filter: drop-shadow(0 2px 8px rgba(0,122,255,0.35)); }
+
+    .brand-logo span {
+      font-weight: 700;
+      font-size: 1.05rem;
+      letter-spacing: -0.02em;
+    }
+
+    .brand-logo small {
+      display: block;
+      font-size: 0.65rem;
+      font-weight: 500;
+      color: rgba(255,255,255,0.5);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .brand-slide-num {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: rgba(255,255,255,0.45);
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* ── Progress ── */
+    .progress-bar {
+      position: fixed;
+      top: var(--brand-h);
+      left: 0;
+      height: 3px;
+      background: var(--gradient-brand);
+      width: 0%;
+      z-index: 1000;
+      transition: width 0.35s ease;
+      box-shadow: 0 0 14px rgba(0, 122, 255, 0.5);
+    }
+
+    .slide-dots {
+      position: fixed;
+      right: 0.85rem;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 999;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      max-height: 70vh;
+      overflow-y: auto;
+      scrollbar-width: none;
+    }
+    .slide-dots::-webkit-scrollbar { display: none; }
+
+    .slide-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--border);
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s;
+      padding: 0;
+      flex-shrink: 0;
+    }
+    .slide-dot.active { background: var(--accent); transform: scale(1.5); box-shadow: 0 0 8px rgba(0,122,255,0.5); }
+
+    .nav-buttons {
+      position: fixed;
+      bottom: 1.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 999;
+      display: flex;
+      gap: 0.6rem;
+      background: rgba(28, 28, 30, 0.92);
+      backdrop-filter: blur(14px);
+      padding: 0.45rem 0.85rem;
+      border-radius: 999px;
+      box-shadow: var(--shadow-lg);
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .nav-btn {
+      padding: 0.55rem 1.1rem;
+      border: none;
+      border-radius: 999px;
+      font-family: inherit;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.25s;
+      background: rgba(255,255,255,0.08);
+      color: #fff;
+    }
+    .nav-btn:hover { background: rgba(255,255,255,0.15); }
+    .nav-btn.primary { background: var(--accent); }
+    .nav-btn.primary:hover { background: var(--accent-hover); }
+    .nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+    /* ── Slides ── */
+    .slide {
+      min-height: 100vh;
+      min-height: 100dvh;
+      scroll-snap-align: start;
+      scroll-snap-stop: always;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: calc(var(--brand-h) + 1.5rem) var(--slide-padding) calc(var(--slide-padding) + 4.5rem);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .slide::before {
+      content: '';
+      position: absolute;
+      top: -20%; right: -10%;
+      width: 50vw; height: 50vw;
+      background: radial-gradient(circle, rgba(46,134,222,0.05) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    /* Marca de agua del pin familiar (esquina inferior izquierda) */
+    .slide::after {
+      content: '';
+      position: absolute;
+      bottom: 5.25rem;
+      left: 1.25rem;
+      width: 30px;
+      height: 30px;
+      background: url('presentacion-assets/favicon-96x96.png') center / contain no-repeat;
+      opacity: 0.1;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .slide-hero::after,
+    .slide-closing::after { opacity: 0.15; bottom: 6rem; }
+
+    .slide:nth-child(odd of .slide) { background: var(--bg); }
+    .slide:nth-child(even of .slide) { background: var(--bg-secondary); }
+
+    .slide-inner {
+      max-width: 1080px;
+      width: 100%;
+      opacity: 0;
+      transform: translateY(28px);
+      transition: opacity 0.65s ease, transform 0.65s ease;
+      position: relative;
+      z-index: 1;
+    }
+    .slide.visible .slide-inner { opacity: 1; transform: translateY(0); }
+
+    h1 { font-size: clamp(1.85rem, 4.5vw, 3rem); font-weight: 800; line-height: 1.12; letter-spacing: -0.03em; }
+    h2 { font-size: clamp(1.5rem, 3.5vw, 2.2rem); font-weight: 700; line-height: 1.2; letter-spacing: -0.02em; margin-bottom: 0.4rem; }
+    h3 { font-size: 1rem; font-weight: 600; }
+    .subtitle { font-size: clamp(0.9rem, 2vw, 1.1rem); color: var(--text-secondary); margin-top: 0.5rem; line-height: 1.5; }
+
+    .slide-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--accent);
+      margin-bottom: 0.85rem;
+      padding: 0.3rem 0.75rem;
+      background: rgba(0,122,255,0.08);
+      border-radius: 999px;
+      border: 1px solid rgba(0,122,255,0.15);
+    }
+
+    .slide-label.code { color: #5856D6; background: rgba(88,86,214,0.08); border-color: rgba(88,86,214,0.2); }
+    .slide-label.app { color: var(--success); background: rgba(52,199,89,0.08); border-color: rgba(52,199,89,0.2); }
+    .slide-label.future { color: var(--purple); background: rgba(175,82,222,0.08); border-color: rgba(175,82,222,0.2); }
+
+    .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; }
+    .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; }
+    .grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 0.85rem; }
+
+    .card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+    .card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
+
+    /* ── Hero slide ── */
+    .slide-hero {
+      background: var(--gradient-hero) !important;
+      color: #fff;
+      text-align: center;
+    }
+    .slide-hero::before {
+      background: radial-gradient(circle at 15% 85%, rgba(0,122,255,0.2) 0%, transparent 45%),
+                  radial-gradient(circle at 85% 15%, rgba(52,199,89,0.12) 0%, transparent 45%);
+      inset: 0; width: 100%; height: 100%; top: 0; right: 0;
+    }
+    .slide-hero h1 {
+      background: linear-gradient(135deg, #fff 30%, #7eb8ff 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .slide-hero .subtitle { color: rgba(255,255,255,0.65); }
+    .hero-logo-big { width: 128px; height: 128px; margin: 0 auto 1.25rem; object-fit: contain; filter: drop-shadow(0 12px 32px rgba(46,134,222,0.55)); }
+    .hero-logo-closing { width: 80px; height: 80px; margin: 0 auto 1rem; display: block; object-fit: contain; filter: drop-shadow(0 8px 20px rgba(46,134,222,0.45)); }
+    .badges { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1.5rem; justify-content: center; }
+    .badge {
+      padding: 0.45rem 0.9rem;
+      background: rgba(255,255,255,0.08);
+      color: #fff;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      border: 1px solid rgba(255,255,255,0.15);
+      backdrop-filter: blur(6px);
+    }
+    .badge.accent { background: rgba(0,122,255,0.25); border-color: rgba(0,122,255,0.4); }
+    .badge.green { background: rgba(52,199,89,0.2); border-color: rgba(52,199,89,0.35); }
+
+    /* ── Code blocks ── */
+    .code-window {
+      background: #1C1C1E;
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow-lg);
+      border: 1px solid #38383A;
+      margin-top: 1.25rem;
+    }
+    .code-titlebar {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.65rem 1rem;
+      background: #2C2C2E;
+      border-bottom: 1px solid #38383A;
+    }
+    .code-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .code-dot.r { background: #FF5F57; }
+    .code-dot.y { background: #FFBD2E; }
+    .code-dot.g { background: #28CA42; }
+    .code-filename { margin-left: 0.5rem; font-size: 0.7rem; color: #98989D; font-family: 'Inter', monospace; }
+    .code-body {
+      padding: 1.1rem 1.25rem;
+      overflow-x: auto;
+      font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+      font-size: clamp(0.68rem, 1.5vw, 0.8rem);
+      line-height: 1.65;
+      color: #E5E5EA;
+    }
+    .code-body .kw { color: #FF7AB2; }
+    .code-body .fn { color: #6BDFFF; }
+    .code-body .str { color: #FC6A5D; }
+    .code-body .cm { color: #636366; font-style: italic; }
+    .code-body .tp { color: #ACF2E4; }
+    .code-body .num { color: #D9C97C; }
+    .code-body .hl { background: rgba(0,122,255,0.15); display: inline-block; width: 100%; margin: 0 -0.25rem; padding: 0 0.25rem; border-left: 2px solid var(--accent); }
+
+    .code-explain {
+      margin-top: 1rem;
+      padding: 1rem 1.25rem;
+      background: rgba(0,122,255,0.05);
+      border-radius: 14px;
+      border-left: 3px solid var(--accent);
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+    .code-explain strong { color: var(--text); }
+
+    /* ── Feature chips ── */
+    .feature-chip {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.85rem;
+      padding: 1rem;
+      background: var(--surface);
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      transition: all 0.25s;
+    }
+    .feature-chip:hover { border-color: var(--accent); box-shadow: 0 4px 16px rgba(0,122,255,0.1); }
+    .feature-icon { font-size: 1.75rem; flex-shrink: 0; line-height: 1; }
+    .feature-chip h3 { font-size: 0.9rem; }
+    .feature-chip p { font-size: 0.78rem; color: var(--text-secondary); margin-top: 0.2rem; line-height: 1.45; }
+
+    /* ── Map types ── */
+    .map-type-card {
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      transition: transform 0.3s;
+    }
+    .map-type-card:hover { transform: scale(1.03); }
+    .map-preview { height: 80px; position: relative; }
+    .map-preview.streets { background: linear-gradient(180deg, #87CEEB 0%, #f0f0f0 40%, #e8e8e8 100%); }
+    .map-preview.dark { background: linear-gradient(180deg, #1a1a2e 0%, #16213e 50%, #0f0f23 100%); }
+    .map-preview.satellite { background: linear-gradient(180deg, #2d5016 0%, #4a7c23 50%, #1a3a0a 100%); }
+    .map-preview.toner { background: linear-gradient(180deg, #fff 0%, #ccc 50%, #888 100%); }
+    .map-type-label { padding: 0.6rem; font-size: 0.75rem; font-weight: 600; text-align: center; background: var(--surface); }
+
+    /* ── Zone colors ── */
+    .zone-swatch {
+      width: 100%;
+      aspect-ratio: 1;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: #fff;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+      transition: transform 0.25s;
+    }
+    .zone-swatch:hover { transform: scale(1.08); }
+
+    /* ── Animated map demo ── */
+    .map-demo {
+      position: relative;
+      width: 100%;
+      max-width: 700px;
+      margin: 1.5rem auto 0;
+      aspect-ratio: 16/10;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: var(--shadow-lg);
+      border: 2px solid var(--border);
+      background: linear-gradient(180deg, #a8d8f0 0%, #c8e6c9 35%, #a5d6a7 60%, #81c784 100%);
+    }
+
+    .map-demo-grid {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.15) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.15) 1px, transparent 1px);
+      background-size: 40px 40px;
+    }
+
+    .map-zone {
+      position: absolute;
+      border-radius: 50%;
+      border: 2px dashed;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.6rem;
+      font-weight: 700;
+      color: rgba(0,0,0,0.5);
+    }
+    .map-zone.home { top: 15%; left: 10%; width: 35%; height: 45%; background: rgba(0,122,255,0.15); border-color: rgba(0,122,255,0.5); }
+    .map-zone.school { top: 50%; left: 55%; width: 30%; height: 35%; background: rgba(52,199,89,0.15); border-color: rgba(52,199,89,0.5); }
+
+    /* Cute avatar (AC / Sims inspired — original CSS art) */
+    .avatar-walker {
+      position: absolute;
+      bottom: 28%;
+      left: 0;
+      animation: walkPath 12s ease-in-out infinite;
+      z-index: 10;
+    }
+
+    .avatar-walker:nth-child(2) { animation-delay: -4s; bottom: 45%; }
+    .avatar-walker:nth-child(3) { animation-delay: -8s; bottom: 60%; }
+
+    @keyframes walkPath {
+      0%   { left: 5%;  transform: scaleX(1); }
+      25%  { left: 35%; transform: scaleX(1); }
+      26%  { left: 35%; transform: scaleX(-1); }
+      50%  { left: 65%; transform: scaleX(-1); }
+      51%  { left: 65%; transform: scaleX(1); }
+      75%  { left: 35%; transform: scaleX(1); }
+      76%  { left: 35%; transform: scaleX(-1); }
+      100% { left: 5%;  transform: scaleX(-1); }
+    }
+
+    .cute-avatar { position: relative; width: 48px; }
+
+    .cute-head {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      margin: 0 auto;
+      position: relative;
+      border: 2px solid rgba(0,0,0,0.1);
+      animation: headBob 0.4s ease-in-out infinite alternate;
+    }
+    .cute-head.cat { background: #F4A460; }
+    .cute-head.bear { background: #8B6914; }
+    .cute-head.bunny { background: #FFB6C1; }
+
+    .cute-ear { position: absolute; width: 10px; height: 14px; border-radius: 50% 50% 0 0; top: -6px; }
+    .cute-ear.l { left: 2px; transform: rotate(-15deg); }
+    .cute-ear.r { right: 2px; transform: rotate(15deg); }
+    .cat .cute-ear { background: #F4A460; }
+    .bear .cute-ear { background: #8B6914; border-radius: 50%; width: 12px; height: 12px; top: -4px; }
+    .bunny .cute-ear { background: #FFB6C1; height: 18px; width: 8px; border-radius: 50%; top: -10px; }
+
+    .cute-face { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; gap: 6px; padding-top: 8px; }
+    .cute-eye { width: 5px; height: 6px; background: #1C1C1E; border-radius: 50%; }
+    .cute-blush { position: absolute; bottom: 10px; width: 6px; height: 4px; background: rgba(255,100,100,0.4); border-radius: 50%; }
+    .cute-blush.l { left: 4px; } .cute-blush.r { right: 4px; }
+
+    .cute-body {
+      width: 28px; height: 20px;
+      border-radius: 10px 10px 6px 6px;
+      margin: -2px auto 0;
+      border: 2px solid rgba(0,0,0,0.08);
+    }
+    .cat .cute-body { background: #5DADE2; }
+    .bear .cute-body { background: #A0522D; }
+    .bunny .cute-body { background: #DDA0DD; }
+
+    .cute-legs { display: flex; justify-content: center; gap: 6px; margin-top: -2px; }
+    .cute-leg {
+      width: 8px; height: 10px;
+      background: rgba(0,0,0,0.15);
+      border-radius: 0 0 4px 4px;
+      animation: legWalk 0.4s ease-in-out infinite alternate;
+    }
+    .cute-leg:nth-child(2) { animation-delay: 0.2s; }
+
+    @keyframes headBob { from { transform: translateY(0); } to { transform: translateY(-2px); } }
+    @keyframes legWalk { from { transform: rotate(-8deg); } to { transform: rotate(8deg); } }
+
+    .map-demo-label {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      padding: 0.5rem 1rem;
+      background: rgba(28,28,30,0.75);
+      backdrop-filter: blur(8px);
+      color: #fff;
+      font-size: 0.7rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .map-demo-label span { color: var(--success); font-weight: 600; }
+
+    /* ── Roadmap ── */
+    .roadmap-item {
+      display: flex;
+      gap: 1rem;
+      padding: 1rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .roadmap-item:last-child { border-bottom: none; }
+    .roadmap-phase {
+      flex-shrink: 0;
+      width: 72px;
+      text-align: center;
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 0.35rem;
+      border-radius: 8px;
+    }
+    .roadmap-phase.now { background: rgba(0,122,255,0.1); color: var(--accent); }
+    .roadmap-phase.next { background: rgba(175,82,222,0.1); color: var(--purple); }
+    .roadmap-phase.far { background: rgba(52,199,89,0.1); color: var(--success); }
+
+    /* ── Misc ── */
+    .pillar { text-align: center; padding: 1.5rem 1rem; }
+    .pillar-icon { font-size: 2.5rem; margin-bottom: 0.75rem; display: block; }
+    .highlight-quote {
+      text-align: center;
+      font-size: clamp(1rem, 2vw, 1.2rem);
+      font-weight: 600;
+      color: var(--accent);
+      margin-top: 1.5rem;
+      padding: 1rem 1.5rem;
+      background: rgba(0,122,255,0.06);
+      border-radius: var(--radius);
+      border-left: 4px solid var(--accent);
+    }
+    .compare-bad { border-top: 4px solid #FF3B30; }
+    .compare-good { border-top: 4px solid var(--success); }
+    .compare-list { list-style: none; margin-top: 0.75rem; }
+    .compare-list li { padding: 0.35rem 0; font-size: 0.82rem; color: var(--text-secondary); display: flex; gap: 0.4rem; }
+
+    .arch-layer { padding: 1rem; border-radius: var(--radius); text-align: center; font-weight: 600; font-size: 0.9rem; }
+    .arch-domain { background: var(--gradient-brand); color: #fff; }
+    .arch-app { background: linear-gradient(135deg, var(--success), #248A3D); color: #fff; }
+    .arch-infra { background: linear-gradient(135deg, #1C1C1E, #3A3A3C); color: #fff; }
+    .arch-diagram { display: flex; flex-direction: column; gap: 0.5rem; max-width: 520px; margin: 1.25rem auto; }
+    .arch-arrow { text-align: center; color: var(--text-secondary); font-size: 1rem; }
+
+    .role-card { text-align: center; padding: 1.25rem 0.75rem; }
+    .role-icon { font-size: 2rem; margin-bottom: 0.5rem; }
+    .role-card.admin { border-top: 3px solid var(--accent); }
+    .role-card.member { border-top: 3px solid var(--success); }
+
+    .mode-card { position: relative; overflow: hidden; }
+    .mode-card::after {
+      content: '';
+      position: absolute;
+      top: 0; right: 0;
+      width: 60px; height: 60px;
+      border-radius: 0 0 0 100%;
+      opacity: 0.12;
+    }
+    .mode-share::after { background: var(--accent); }
+    .mode-privacy::after { background: var(--purple); }
+    .mode-ghost::after { background: #636366; }
+
+    .slide-closing { background: var(--gradient-hero) !important; color: #fff; text-align: center; }
+    .slide-closing .slide-inner { z-index: 1; }
+    .closing-quote { font-size: clamp(1.1rem, 2.5vw, 1.5rem); font-weight: 600; line-height: 1.5; margin: 1.25rem 0; }
+    .github-link {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      margin-top: 1.25rem; padding: 0.75rem 1.35rem;
+      background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 999px; color: #fff; text-decoration: none; font-weight: 600; font-size: 0.85rem;
+      transition: all 0.3s;
+    }
+    .github-link:hover { background: rgba(255,255,255,0.2); transform: translateY(-2px); }
+
+    .qr-grid {
+      display: flex; flex-wrap: wrap; gap: 1rem; justify-content: center; margin-top: 1.25rem;
+    }
+    .qr-card {
+      text-align: center; background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.15); border-radius: 16px;
+      padding: 0.85rem 1rem; min-width: 130px; backdrop-filter: blur(8px);
+    }
+    .qr-card img {
+      width: 110px; height: 110px; border-radius: 10px; background: #fff;
+      padding: 5px; display: block; margin: 0 auto 0.5rem;
+    }
+    .qr-card p { font-size: 0.78rem; font-weight: 600; color: #fff; margin-bottom: 0.15rem; }
+    .qr-card small { font-size: 0.62rem; color: rgba(255,255,255,0.45); display: block; margin-bottom: 0.35rem; }
+    .qr-card a { color: #7eb8ff; font-size: 0.65rem; text-decoration: none; word-break: break-all; }
+    .qr-card a:hover { text-decoration: underline; }
+
+    .chat-bubble {
+      padding: 0.6rem 0.9rem;
+      border-radius: 16px;
+      font-size: 0.78rem;
+      max-width: 80%;
+      margin-bottom: 0.4rem;
+    }
+    .chat-bubble.me { background: var(--accent); color: #fff; margin-left: auto; border-bottom-right-radius: 4px; }
+    .chat-bubble.them { background: var(--bg-secondary); border-bottom-left-radius: 4px; }
+
+    .challenge-bar { height: 6px; background: var(--border); border-radius: 3px; margin-top: 0.5rem; overflow: hidden; }
+    .challenge-fill { height: 100%; background: var(--success); border-radius: 3px; }
+
+    .reflection-quote {
+      font-size: 0.95rem; line-height: 1.65; padding: 1.25rem;
+      background: var(--surface); border-radius: var(--radius);
+      border-left: 4px solid var(--accent); margin: 1.25rem 0; font-style: italic;
+    }
+
+    @media (max-width: 768px) {
+      .slide-dots { display: none; }
+      .brand-logo span:not(.brand-only-icon) { display: none; }
+      .code-body { font-size: 0.65rem; }
+      .map-demo { aspect-ratio: 4/3; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      .slide-inner, .avatar-walker, .cute-head, .cute-leg { animation: none !important; transition: none; opacity: 1; transform: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Brand bar fija -->
+  <header class="brand-bar">
+    <a class="brand-logo" href="#" onclick="goToSlide(0);return false" aria-label="FamilyLink inicio">
+      <img src="presentacion-assets/favicon-96x96.png" alt="" width="38" height="38" draggable="false" />
+      <span>
+        FamilyLink
+        <small>Saber dónde está tu gente — si ellos quieren</small>
+      </span>
+    </a>
+    <span class="brand-slide-num" id="slideCounter">1 / 20</span>
+  </header>
+
+  <div class="progress-bar" id="progressBar" role="progressbar"></div>
+  <nav class="slide-dots" id="slideDots" aria-label="Diapositivas"></nav>
+
+  <div class="nav-buttons">
+    <button class="nav-btn" id="btnPrev">← Anterior</button>
+    <button class="nav-btn primary" id="btnNext">Siguiente →</button>
+  </div>
+
+  <!-- ═══ 1. PORTADA ═══ -->
+  <section class="slide slide-hero" data-slide="0">
+    <div class="slide-inner" style="text-align:center">
+      <img class="hero-logo-big" src="presentacion-assets/web-app-manifest-512x512.png" alt="FamilyLink" width="128" height="128" draggable="false" />
+      <h1>FamilyLink</h1>
+      <p class="subtitle" style="font-size:clamp(1.1rem,2.5vw,1.35rem);color:rgba(255,255,255,0.85);font-weight:500;margin-top:0.5rem">La app para saber dónde está tu familia… sin convertirte en el FBI</p>
+      <p class="subtitle">TFG · Desarrollo de Aplicaciones Multiplataforma · José</p>
+      <div class="badges">
+        <span class="badge accent">Código con cabeza</span>
+        <span class="badge">IA que ayuda de verdad</span>
+        <span class="badge green">Privacidad primero</span>
+      </div>
+      <p style="margin-top:2rem;font-size:0.8rem;color:rgba(255,255,255,0.4)">Vamos — flechas, scroll o botones ↓</p>
+    </div>
+  </section>
+
+  <!-- ═══ 2. QUÉ ES ═══ -->
+  <section class="slide" data-slide="1">
+    <div class="slide-inner">
+      <span class="slide-label app">📱 En pocas palabras</span>
+      <h2>¿Qué es FamilyLink?</h2>
+      <p class="subtitle">Imagina Life360… pero sin que tu madre te vigile mientras duermes la siesta</p>
+      <div class="grid-3" style="margin-top:1.5rem">
+        <div class="card pillar"><span class="pillar-icon">📍</span><h3>Tú decides cuándo</h3><p style="font-size:0.8rem;color:var(--text-secondary);margin-top:0.4rem">Un toque y compartes. Otro toque y desapareces. Tu móvil no es un grillo 24 horas.</p></div>
+        <div class="card pillar"><span class="pillar-icon">🛡️</span><h3>Modo no molestar</h3><p style="font-size:0.8rem;color:var(--text-secondary);margin-top:0.4rem">Pausas la ubicación un rato. El grupo lo sabe, pero respetan tu espacio. Máx. 5 veces al día.</p></div>
+        <div class="card pillar"><span class="pillar-icon">👨‍👩‍👧</span><h3>Tu gente, tu círculo</h3><p style="font-size:0.8rem;color:var(--text-secondary);margin-top:0.4rem">Familia, pareja, colegas del piso… quien tú invites. Nadie más.</p></div>
+      </div>
+      <p class="highlight-quote">"Estar conectados sí. Sentirse espiados, no."</p>
+    </div>
+  </section>
+
+  <!-- ═══ 3. PROBLEMA ═══ -->
+  <section class="slide" data-slide="2">
+    <div class="slide-inner">
+      <span class="slide-label">⚡ El porqué</span>
+      <h2>¿Para qué otra app de ubicación?</h2>
+      <p class="subtitle">Porque las que hay ahora parecen diseñadas por alguien que nunca tuvo familia</p>
+      <div class="grid-2" style="margin-top:1.25rem">
+        <div class="card compare-bad">
+          <h3 style="color:#FF3B30">😤 Lo de siempre</h3>
+          <ul class="compare-list">
+            <li>🔋 Te funde la batería como si fueras un radar</li>
+            <li>👁️ Siempre encendido, siempre mirando</li>
+            <li>😰 "¿Por qué estabas ahí?" — conversación incómoda garantizada</li>
+          </ul>
+        </div>
+        <div class="card compare-good">
+          <h3 style="color:var(--success)">😌 FamilyLink</h3>
+          <ul class="compare-list">
+            <li>⚡ Compartes cuando tiene sentido</li>
+            <li>🛡️ Modo no molestar — pausas y el grupo lo respeta</li>
+            <li>👻 Modo fantasma — desapareces en silencio (otro nivel, sin avisar)</li>
+            <li>🗺️ Mapa, chat y zonas en la misma app</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ 4. SISTEMA COGNITIVO ═══ -->
+  <section class="slide" data-slide="3">
+    <div class="slide-inner">
+      <span class="slide-label">🧠 Cómo lo construí</span>
+      <h2>No programé solo. Orquesté.</h2>
+      <p class="subtitle">La IA no escribió el TFG por mí — pero sí me quitó el trabajo aburrido para que yo pensara en lo importante</p>
+      <div class="grid-2" style="margin-top:1.25rem">
+        <div class="card"><h3>Antes: "Hazme un login"</h3><p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.4rem">Copiar, pegar, rezar. La IA responde bonito… y a veces inventa cosas que no existen. <strong>Spoiler: no funciona así en producción.</strong></p></div>
+        <div class="card"><h3>Ahora: un equipo de agentes</h3><p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.4rem">Uno diseña, otro codea, otro revisa, otro testea. Y <strong>Engram</strong> recuerda lo que decidimos ayer — porque la IA olvida como un pez.</p></div>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:0.4rem;justify-content:center;margin-top:1.25rem;padding:1rem;background:var(--surface);border-radius:var(--radius);border:1px solid var(--border)">
+        <span class="badge" style="background:var(--bg-secondary);color:var(--text)">Instrucciones</span> →
+        <span class="badge" style="background:var(--bg-secondary);color:var(--text)">Skills</span> →
+        <span class="badge" style="background:var(--bg-secondary);color:var(--text)">Mini-equipo IA</span> →
+        <span class="badge" style="background:var(--bg-secondary);color:var(--text)">Memoria (Engram)</span> →
+        <span class="badge accent" style="background:var(--accent);color:#fff">Yo supervisando todo</span>
+      </div>
+      <p class="highlight-quote" style="margin-top:1.25rem;border-left-color:var(--purple)">Inspirado en Gentleman Programming: la IA no piensa por ti, pero si la diriges bien, vuela.</p>
+    </div>
+  </section>
+
+  <!-- ═══ 5. ARQUITECTURA ═══ -->
+  <section class="slide" data-slide="4">
+    <div class="slide-inner">
+      <span class="slide-label">🏗️ Por debajo del capó</span>
+      <h2>Código ordenado (de verdad)</h2>
+      <p class="subtitle">Arquitectura hexagonal + DDD — suena técnico, pero la idea es simple: las reglas del juego en el centro, todo lo demás intercambiable</p>
+      <div class="arch-diagram">
+        <div class="arch-layer arch-domain">🧠 El cerebro — reglas de negocio puras</div>
+        <div class="arch-arrow">↕ "oye, necesito guardar esto"</div>
+        <div class="arch-layer arch-app">⚙️ Los casos de uso — "compartir ubicación", "crear zona"…</div>
+        <div class="arch-arrow">↕ cables</div>
+        <div class="arch-layer arch-infra">🔌 Lo tangible — base de datos, websockets, APIs</div>
+      </div>
+      <p class="code-explain" style="margin-top:1rem">💡 <strong>¿Por qué?</strong> Si mañana cambio de PostgreSQL a otra cosa, no tengo que reescribir media app. El dominio ni se entera.</p>
+    </div>
+  </section>
+
+  <!-- ═══ 6. CÓDIGO: ShareLocation ═══ -->
+  <section class="slide" data-slide="5">
+    <div class="slide-inner">
+      <span class="slide-label code">💻 Un poco de código</span>
+      <h2>"¿Dónde estás?" — el momento clave</h2>
+      <p class="subtitle">Cuando pulsas compartir, esto es lo que pasa por detrás (sin magia, con sentido)</p>
+      <div class="code-window">
+        <div class="code-titlebar">
+          <span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span>
+          <span class="code-filename">ShareLocationUseCase.ts</span>
+        </div>
+        <pre class="code-body"><span class="kw">async</span> <span class="fn">execute</span>(dto: ShareLocationInputDTO) {
+  <span class="kw">const</span> userId = UserId.<span class="fn">create</span>(dto.userId);
+  <span class="kw">const</span> coordinates = Coordinates.<span class="fn">create</span>(dto.latitude, dto.longitude);
+
+  <span class="kw">if</span> (user.<span class="fn">isPrivacyModeActive</span>()) {
+    <span class="kw">throw</span> AppError.<span class="fn">forbidden</span>(<span class="str">'Cannot share while privacy mode active'</span>);
+  }
+
+  <span class="cm">// Evalúa geocercas: ¿entró o salió de una zona?</span>
+  <span class="kw">const</span> transitions = <span class="kw">this</span>.zoneEvaluationService
+    .<span class="fn">evaluateTransitions</span>(prevCoords, coordinates, zones);
+
+  <span class="kw">for</span> (<span class="kw">const</span> t <span class="kw">of</span> transitions) {
+    <span class="kw">await</span> <span class="kw">this</span>.eventPublisher.<span class="fn">publish</span>(
+      t.type === <span class="str">'entered'</span> ? <span class="kw">new</span> <span class="tp">ZoneEntered</span>(...) : <span class="kw">new</span> <span class="tp">ZoneExited</span>(...)
+    );
+  }
+
+  <span class="kw">await</span> <span class="kw">this</span>.locationCache.<span class="fn">set</span>(userId, coordinates); <span class="cm">// Redis</span>
+  <span class="kw">await</span> <span class="kw">this</span>.eventPublisher.<span class="fn">publish</span>(<span class="kw">new</span> <span class="tp">LocationShared</span>(...));
+}</pre>
+      </div>
+      <div class="code-explain">💡 <strong>En castellano:</strong> si tienes el modo no molestar activo, ni lo intentes. Si no, mira si entraste o saliste de "Casa", avisa al grupo y guarda la posición.</div>
+    </div>
+  </section>
+
+  <!-- ═══ 7. CÓDIGO: Geocercas ═══ -->
+  <section class="slide" data-slide="6">
+    <div class="slide-inner">
+      <span class="slide-label code">💻 Geometría útil</span>
+      <h2>¿Está dentro de "Casa" o no?</h2>
+      <p class="subtitle">Tocas el mapa, marcas el centro de la zona y ajustas el radio — la app detecta entradas y salidas sin preguntar cada cinco minutos</p>
+      <div class="code-window">
+        <div class="code-titlebar">
+          <span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span>
+          <span class="code-filename">ZoneEvaluationService.ts</span>
+        </div>
+        <pre class="code-body"><span class="cm">// Ray-casting: impar = dentro, par = fuera</span>
+<span class="kw">private</span> <span class="fn">raycast</span>(lat, lng, vertices) {
+  <span class="kw">let</span> inside = <span class="num">false</span>;
+  <span class="kw">for</span> (<span class="kw">let</span> i = <span class="num">0</span>, j = n - <span class="num">1</span>; i &lt; n; j = i++) {
+    <span class="hl">if ((vi.lat > lat) !== (vj.lat > lat) &&
+        lng &lt; ((vj.lng - vi.lng) * (lat - vi.lat)) / (vj.lat - vi.lat) + vi.lng)</span>
+      inside = !inside;
+  }
+  <span class="kw">return</span> inside;
+}
+
+<span class="cm">// Transiciones: compara zona anterior vs nueva posición</span>
+<span class="fn">evaluateTransitions</span>(prev, current, zones) → ZoneEntered | ZoneExited</pre>
+      </div>
+      <div class="code-explain">🎯 Escenario real: mamá sale de 🏠 Casa → el grupo recibe aviso. Llega al 🏫 Colegio → otro aviso. Tú no tienes que estar preguntando "¿ya llegaste?". La app ya lo sabe.</div>
+    </div>
+  </section>
+
+  <!-- ═══ 8. CÓDIGO: Value Object ═══ -->
+  <section class="slide" data-slide="7">
+    <div class="slide-inner">
+      <span class="slide-label code">💻 Detalle curioso</span>
+      <h2>Cada zona tiene su color (y no aceptamos basura)</h2>
+      <p class="subtitle">Si alguien manda <code>#ZZZZZZ</code> como color, el sistema lo rechaza antes de llegar a la base de datos</p>
+      <div class="grid-2">
+        <div class="code-window" style="margin-top:0">
+          <div class="code-titlebar"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span><span class="code-filename">ColorHex.ts</span></div>
+          <pre class="code-body"><span class="kw">static</span> <span class="fn">create</span>(hex: <span class="tp">string</span>): ColorHex {
+  <span class="kw">const</span> trimmed = hex.<span class="fn">trim</span>().<span class="fn">toUpperCase</span>();
+  <span class="kw">if</span> (!<span class="str">/^#[0-9A-F]{6}$/</span>.<span class="fn">test</span>(trimmed))
+    <span class="kw">throw</span> <span class="kw">new</span> Error(<span class="str">'Invalid color hex'</span>);
+  <span class="kw">return new</span> <span class="tp">ColorHex</span>(trimmed);
+}</pre>
+        </div>
+        <div>
+          <p style="font-size:0.85rem;color:var(--text-secondary);margin-bottom:1rem">Paleta estilo Apple — porque "Casa" en rojo y "Gym" en naranja se entiende a la primera:</p>
+          <div class="grid-4">
+            <div class="zone-swatch" style="background:#FF3B30">Casa</div>
+            <div class="zone-swatch" style="background:#FF9500">Gym</div>
+            <div class="zone-swatch" style="background:#FFCC00">Colegio</div>
+            <div class="zone-swatch" style="background:#34C759">Parque</div>
+            <div class="zone-swatch" style="background:#007AFF">Trabajo</div>
+            <div class="zone-swatch" style="background:#5856D6">Abuela</div>
+            <div class="zone-swatch" style="background:#AF52DE">Amigos</div>
+            <div class="zone-swatch" style="background:#FF2D55">Pareja</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ 9. CÓDIGO: WebSocket ═══ -->
+  <section class="slide" data-slide="8">
+    <div class="slide-inner">
+      <span class="slide-label code">💻 En vivo</span>
+      <h2>El mapa se actualiza solo</h2>
+      <p class="subtitle">Sin refrescar la página como en 2010 — cuando tu hermano comparte, lo ves al momento</p>
+      <div class="code-window">
+        <div class="code-titlebar"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span><span class="code-filename">useSocket.ts</span></div>
+        <pre class="code-body"><span class="kw">const</span> socket = <span class="fn">io</span>(API_URL, { path: <span class="str">'/ws'</span>, auth: { token } });
+
+socket.<span class="fn">on</span>(<span class="str">'connect'</span>, () => socket.<span class="fn">emit</span>(<span class="str">'join:circle'</span>, circleId));
+
+socket.<span class="fn">on</span>(<span class="str">'location:updated'</span>, (data) => {
+  <span class="fn">updateMemberLocation</span>(data.userId, data.coordinates.lat, data.coordinates.lng);
+});
+
+socket.<span class="fn">on</span>(<span class="str">'privacy:activated'</span>, (data) => {
+  <span class="cm">// El avatar desaparece del mapa para los demás</span>
+  setMembers(members.<span class="fn">map</span>(m => m.userId === data.userId
+    ? { ...m, isPrivacyModeActive: <span class="num">true</span> } : m));
+});</pre>
+      </div>
+      <div class="code-explain">📡 Si alguien activa el modo no molestar, su punto desaparece del mapa. Con el modo fantasma, además, nadie recibe aviso.</div>
+    </div>
+  </section>
+
+  <!-- ═══ 10. DEMO ANIMADA AVATARES ═══ -->
+  <section class="slide" data-slide="9">
+    <div class="slide-inner">
+      <span class="slide-label app">🎮 Lo que viene</span>
+      <h2>Personajes caminando por el mapa</h2>
+      <p class="subtitle">Sueño a futuro: avatares estilo Animal Crossing o Los Sims — que ver a tu gente sea bonito, no un punto azul aburrido</p>
+
+      <div class="map-demo">
+        <div class="map-demo-grid"></div>
+        <div class="map-zone home">🏠 Casa</div>
+        <div class="map-zone school">🏫 Colegio</div>
+
+        <!-- Avatar 1: gato -->
+        <div class="avatar-walker">
+          <div class="cute-avatar">
+            <div class="cute-head cat">
+              <div class="cute-ear l"></div><div class="cute-ear r"></div>
+              <div class="cute-face"><span class="cute-eye"></span><span class="cute-eye"></span></div>
+              <span class="cute-blush l"></span><span class="cute-blush r"></span>
+            </div>
+            <div class="cute-body"></div>
+            <div class="cute-legs"><div class="cute-leg"></div><div class="cute-leg"></div></div>
+          </div>
+        </div>
+        <!-- Avatar 2: oso -->
+        <div class="avatar-walker">
+          <div class="cute-avatar">
+            <div class="cute-head bear">
+              <div class="cute-ear l"></div><div class="cute-ear r"></div>
+              <div class="cute-face"><span class="cute-eye"></span><span class="cute-eye"></span></div>
+            </div>
+            <div class="cute-body"></div>
+            <div class="cute-legs"><div class="cute-leg"></div><div class="cute-leg"></div></div>
+          </div>
+        </div>
+        <!-- Avatar 3: conejo -->
+        <div class="avatar-walker">
+          <div class="cute-avatar">
+            <div class="cute-head bunny">
+              <div class="cute-ear l"></div><div class="cute-ear r"></div>
+              <div class="cute-face"><span class="cute-eye"></span><span class="cute-eye"></span></div>
+              <span class="cute-blush l"></span><span class="cute-blush r"></span>
+            </div>
+            <div class="cute-body"></div>
+            <div class="cute-legs"><div class="cute-leg"></div><div class="cute-leg"></div></div>
+          </div>
+        </div>
+
+        <div class="map-demo-label">
+          <span>● En vivo</span>
+          <span>Mamá acaba de entrar en 🏠 Casa</span>
+        </div>
+      </div>
+      <p class="code-explain" style="margin-top:1rem">🚀 <strong>Hoy:</strong> círculos con foto y estado. <strong>Mañana:</strong> tu madre como un osito caminando hacia "Casa". Lo sé, suena ridículo. Por eso mola.</p>
+    </div>
+  </section>
+
+  <!-- ═══ 11. MODOS DE USUARIO ═══ -->
+  <section class="slide" data-slide="10">
+    <div class="slide-inner">
+      <span class="slide-label app">👤 Modos de vida</span>
+      <h2>Tú eliges cómo apareces</h2>
+      <p class="subtitle">Porque no es lo mismo ir al médico que quedar con amigos — y tu familia no necesita saberlo todo</p>
+      <div class="grid-3" style="margin-top:1.25rem">
+        <div class="card mode-card mode-share">
+          <h3>📍 "Aquí estoy"</h3>
+          <p style="font-size:0.8rem;color:var(--text-secondary);margin-top:0.4rem">Un toque y tu gente te ve. Sin dejar el GPS encendido toda la tarde.</p>
+        </div>
+        <div class="card mode-card mode-privacy">
+          <h3>🛡️ Modo no molestar</h3>
+          <p style="font-size:0.8rem;color:var(--text-secondary);margin-top:0.4rem">Pausas tu ubicación 15 min–8 h. El grupo lo ve, pero respeta. Máx. 5 activaciones al día.</p>
+        </div>
+        <div class="card mode-card mode-ghost">
+          <h3>👻 Modo fantasma</h3>
+          <p style="font-size:0.8rem;color:var(--text-secondary);margin-top:0.4rem"><strong>No es lo mismo:</strong> desapareces del mapa y nadie recibe aviso. Silencio total. Úsalo con cabeza.</p>
+        </div>
+        <div class="card">
+          <h3>✅ Llegué bien</h3>
+          <p style="font-size:0.8rem;color:var(--text-secondary);margin-top:0.4rem">Un botón para callar a tu madre antes de que te llame tres veces.</p>
+        </div>
+        <div class="card">
+          <h3>🟢 Estoy conectado</h3>
+          <p style="font-size:0.8rem;color:var(--text-secondary);margin-top:0.4rem">Puntito verde = está en la app ahora mismo. Como WhatsApp, pero en el mapa.</p>
+        </div>
+        <div class="card">
+          <h3>😊 Tu estado</h3>
+          <p style="font-size:0.8rem;color:var(--text-secondary);margin-top:0.4rem">"En el gym", "De camino", "No me hables"… lo que necesites.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ 12. ROLES ═══ -->
+  <section class="slide" data-slide="11">
+    <div class="slide-inner">
+      <span class="slide-label app">👥 Quién manda</span>
+      <h2>Dos roles, cero líos</h2>
+      <p class="subtitle">Alguien tiene que ser el adulto responsable del grupo. Spoiler: normalmente es mamá.</p>
+      <div class="grid-2" style="margin-top:1.25rem">
+        <div class="card role-card admin">
+          <div class="role-icon">👑</div>
+          <h3>Admin del círculo</h3>
+          <ul class="compare-list" style="text-align:left;margin-top:0.75rem">
+            <li>✅ Invita y echa a quien toque</li>
+            <li>✅ Decide quién es admin</li>
+            <li>✅ Crea y borra zonas</li>
+            <li>✅ Pone las reglas del grupo</li>
+            <li>✅ Puede disolver el círculo (modo nuclear)</li>
+          </ul>
+        </div>
+        <div class="card role-card member">
+          <div class="role-icon">👤</div>
+          <h3>Miembro</h3>
+          <ul class="compare-list" style="text-align:left;margin-top:0.75rem">
+            <li>✅ Comparte, chatea, juega con retos</li>
+            <li>✅ Crea zonas si el grupo lo permite</li>
+            <li>✅ Modo no molestar y modo fantasma</li>
+            <li>❌ No echa a nadie ni cierra el grupo</li>
+            <li>😌 Básicamente, disfruta y no líes</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ 13. MAPAS ═══ -->
+  <section class="slide" data-slide="12">
+    <div class="slide-inner">
+      <span class="slide-label app">🗺️ Mapas</span>
+      <h2>El mapa también tiene personalidad</h2>
+      <p class="subtitle">Cuatro estilos para elegir — de día, de noche, satélite o minimalista</p>
+      <div class="grid-4" style="margin-top:1.25rem">
+        <div class="map-type-card"><div class="map-preview streets"></div><div class="map-type-label">🌆 Streets</div></div>
+        <div class="map-type-card"><div class="map-preview dark"></div><div class="map-type-label">🌙 Dark</div></div>
+        <div class="map-type-card"><div class="map-preview satellite"></div><div class="map-type-label">🛰️ Satellite</div></div>
+        <div class="map-type-card"><div class="map-preview toner"></div><div class="map-type-label">🖤 Toner</div></div>
+      </div>
+      <div class="grid-3" style="margin-top:1rem">
+        <div class="feature-chip"><span class="feature-icon">🏢</span><div><h3>Edificios 3D</h3><p>Porque a veces quieres ver la ciudad en volumen</p></div></div>
+        <div class="feature-chip"><span class="feature-icon">🌤️</span><div><h3>El tiempo ahí</h3><p>Sabes si tu hermano está bajo el sol o bajo la tormenta</p></div></div>
+        <div class="feature-chip"><span class="feature-icon">📖</span><div><h3>Historias del mapa</h3><p>Dónde ha estado tu gente últimamente — estilo stories</p></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ 14. ZONAS ═══ -->
+  <section class="slide" data-slide="13">
+    <div class="slide-inner">
+      <span class="slide-label app">📍 Zonas</span>
+      <h2>Marca "Casa", "Gym", "Casa de la abuela"…</h2>
+      <p class="subtitle">Geocercas circulares: un toque en el mapa, eliges radio y color — la app avisa sola</p>
+      <div class="grid-2" style="margin-top:1.25rem">
+        <div>
+          <div class="feature-chip" style="margin-bottom:0.75rem"><span class="feature-icon">👆</span><div><h3>Toca el mapa</h3><p>Colocas el centro con un toque (en móvil no se dibuja a mano alzada — arrastrar mueve el mapa)</p></div></div>
+          <div class="feature-chip" style="margin-bottom:0.75rem"><span class="feature-icon">🎨</span><div><h3>Cada zona, su color</h3><p>Para distinguirlas de un vistazo</p></div></div>
+          <div class="feature-chip"><span class="feature-icon">🔔</span><div><h3>Avisos automáticos</h3><p>"Ha llegado a Casa" — sin que nadie escriba nada</p></div></div>
+        </div>
+        <div class="card">
+          <h3>Ejemplos que la gente crea de verdad</h3>
+          <div style="display:flex;flex-wrap:wrap;gap:0.4rem;margin-top:0.75rem">
+            <span class="badge" style="background:#FF3B30;color:#fff">🏠 Casa</span>
+            <span class="badge" style="background:#007AFF;color:#fff">💼 Trabajo</span>
+            <span class="badge" style="background:#FFCC00;color:#1C1C1E">🏫 Colegio</span>
+            <span class="badge" style="background:#34C759;color:#fff">🌳 Parque</span>
+            <span class="badge" style="background:#FF9500;color:#fff">🏋️ Gym</span>
+            <span class="badge" style="background:#AF52DE;color:#fff">👵 Abuela</span>
+          </div>
+          <p style="font-size:0.78rem;color:var(--text-secondary);margin-top:0.75rem">Hasta 20 zonas por grupo. Ajustas el radio con un slider — de 50 m a lo que necesites.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ 15. CHAT ═══ -->
+  <section class="slide" data-slide="14">
+    <div class="slide-inner">
+      <span class="slide-label app">💬 Chat</span>
+      <h2>El grupo de WhatsApp… pero integrado</h2>
+      <p class="subtitle">Sin cambiar de app para preguntar "¿dónde estás?" y mandar un GIF de un gato</p>
+      <div class="grid-2" style="margin-top:1.25rem">
+        <div class="card" style="display:flex;flex-direction:column;gap:0.3rem">
+          <div class="chat-bubble them">¿Ya estás en casa? 🏠</div>
+          <div class="chat-bubble me">¡Sí! Llegué bien, no me llames 😅</div>
+          <div class="chat-bubble them">La app dice que acabas de entrar en Casa 👀</div>
+          <div class="chat-bubble me">*manda GIF de confeti* 🎉</div>
+        </div>
+        <div>
+          <div class="feature-chip" style="margin-bottom:0.6rem"><span class="feature-icon">😀</span><div><h3>GIFs y emojis</h3><p>Porque a veces un GIF vale más que mil coordenadas</p></div></div>
+          <div class="feature-chip" style="margin-bottom:0.6rem"><span class="feature-icon">📸</span><div><h3>Fotos y audios</h3><p>"Mira dónde estoy" con imagen incluida</p></div></div>
+          <div class="feature-chip" style="margin-bottom:0.6rem"><span class="feature-icon">📊</span><div><h3>Encuestas</h3><p>"¿Pizza o hamburguesa?" — democracia familiar</p></div></div>
+          <div class="feature-chip"><span class="feature-icon">🎨</span><div><h3>Temas de chat</h3><p>Que cada círculo tenga su vibe</p></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ 16. RETOS ═══ -->
+  <section class="slide" data-slide="15">
+    <div class="slide-inner">
+      <span class="slide-label app">🏆 Retos</span>
+      <h2>Que usar la app no sea un coñazo</h2>
+      <p class="subtitle">Retos diarios, medallas y rachas — un poco de juego para que la familia participe de verdad</p>
+      <div class="grid-2" style="margin-top:1.25rem">
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center"><h3>🗺️ Explorador</h3><span style="font-size:0.7rem;color:var(--success)">2/3</span></div>
+          <p style="font-size:0.78rem;color:var(--text-secondary)">Comparte ubicación 3 veces</p>
+          <div class="challenge-bar"><div class="challenge-fill" style="width:66%"></div></div>
+        </div>
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center"><h3>💬 Comunicador</h3><span style="font-size:0.7rem;color:var(--accent)">✓</span></div>
+          <p style="font-size:0.78rem;color:var(--text-secondary)">Envía 5 mensajes — ¡Completado!</p>
+          <div class="challenge-bar"><div class="challenge-fill" style="width:100%"></div></div>
+        </div>
+        <div class="card">
+          <h3>👻 Fantasma</h3>
+          <p style="font-size:0.78rem;color:var(--text-secondary)">Activa modo fantasma 1 vez</p>
+          <div class="challenge-bar"><div class="challenge-fill" style="width:30%"></div></div>
+        </div>
+        <div class="card">
+          <h3>🔥 Racha: 5 días seguidos</h3>
+          <p style="font-size:0.78rem;color:var(--text-secondary)">Presume de medallas en tu perfil. Sí, tu madre también competirá.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ 17. ECOSISTEMA IA ═══ -->
+  <section class="slide" data-slide="16">
+    <div class="slide-inner">
+      <span class="slide-label">🤖 Las herramientas</span>
+      <h2>Mi caja de herramientas IA</h2>
+      <p class="subtitle">No es magia — es saber qué usar y cuándo. Esto es lo que me acompañó en el TFG</p>
+      <div class="grid-2" style="margin-top:1.25rem">
+        <div class="card"><h3>🧠 Engram</h3><p style="font-size:0.8rem;color:var(--text-secondary);margin-top:0.35rem">La memoria que la IA no tiene. Recuerda decisiones de ayer para no repetir errores hoy.</p></div>
+        <div class="card"><h3>🔌 MCP</h3><p style="font-size:0.8rem;color:var(--text-secondary);margin-top:0.35rem">El "enchufe" que conecta la IA con el mundo real: archivos, terminal, memoria…</p></div>
+        <div class="card"><h3>📚 Skills</h3><p style="font-size:0.8rem;color:var(--text-secondary);margin-top:0.35rem">Manuales que solo se abren cuando hacen falta. Menos ruido, más foco.</p></div>
+        <div class="card"><h3>🎯 Mini-equipo</h3><p style="font-size:0.8rem;color:var(--text-secondary);margin-top:0.35rem">Uno diseña, otro programa, otro revisa, otro testea. Yo hago de director.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ 18. REFLEXIÓN ═══ -->
+  <section class="slide" data-slide="17">
+    <div class="slide-inner">
+      <span class="slide-label">💭 Para cerrar el tema IA</span>
+      <h2>Lo que aprendí (y no sale en el código)</h2>
+      <blockquote class="reflection-quote">"La IA no va a quitarnos el trabajo, pero alguien que sepa usarla bien le va a quitar el trabajo a quien solo copie y pegue sin entender. El futuro no es picar código a ciegas — es dirigir, revisar y pensar."</blockquote>
+      <div class="grid-2">
+        <div class="card compare-bad"><h3 style="color:#FF3B30">😬 El que copia y reza</h3><p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.4rem">"Funciona en mi máquina" y a correr. Hasta que no funciona. Y nadie sabe por qué.</p></div>
+        <div class="card compare-good"><h3 style="color:var(--success)">🎯 El que dirige</h3><p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.4rem">Entiende el porqué, delega el cómo, revisa el resultado. Ese soy yo intentando ser.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ 19. ROADMAP FUTURO ═══ -->
+  <section class="slide" data-slide="18">
+    <div class="slide-inner">
+      <span class="slide-label future">🚀 Lo que viene</span>
+      <h2>Esto no acaba con el TFG</h2>
+      <p class="subtitle">FamilyLink es un proyecto vivo — esto es lo que tengo en la cabeza para cuando termine el curso</p>
+      <div style="margin-top:1.25rem">
+        <div class="roadmap-item">
+          <div class="roadmap-phase now">Ya</div>
+          <div><h3>App funcionando en web y Android</h3><p style="font-size:0.82rem;color:var(--text-secondary)">La puedes probar. De verdad. No es un mockup de Figma.</p></div>
+        </div>
+        <div class="roadmap-item">
+          <div class="roadmap-phase next">Pronto</div>
+          <div><h3>📱 Google Play Store</h3><p style="font-size:0.82rem;color:var(--text-secondary)">Que tu madre la descargue sin pasar por "instalar APK raro del hijo"</p></div>
+        </div>
+        <div class="roadmap-item">
+          <div class="roadmap-phase next">Pronto</div>
+          <div><h3>🎮 Avatares Animal Crossing / Sims</h3><p style="font-size:0.82rem;color:var(--text-secondary)">Personajes caminando por el mapa, con ropa, emotes y todo. Porque un punto azul da pena.</p></div>
+        </div>
+        <div class="roadmap-item">
+          <div class="roadmap-phase far">Algún día</div>
+          <div><h3>🍎 iPhone, Apple Watch, widgets</h3><p style="font-size:0.82rem;color:var(--text-secondary)">"Llegué bien" en la muñeca. Live Activities. La familia Apple completa.</p></div>
+        </div>
+        <div class="roadmap-item">
+          <div class="roadmap-phase far">Algún día</div>
+          <div><h3>🤖 IA que aprende rutinas</h3><p style="font-size:0.82rem;color:var(--text-secondary)">"Papá suele llegar a las 18:00 y hoy no ha llegado" — sin que nadie programe nada a mano.</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ 20. CIERRE ═══ -->
+  <section class="slide slide-closing" data-slide="19">
+    <div class="slide-inner">
+      <img class="hero-logo-closing" src="presentacion-assets/web-app-manifest-512x512.png" alt="FamilyLink" width="80" height="80" draggable="false" />
+      <h2 style="color:#fff">FamilyLink</h2>
+      <p class="closing-quote">"Menos espía, más cercanía. Eso es todo."</p>
+      <p style="color:rgba(255,255,255,0.6);font-size:0.9rem">Escanead y probadla — o seguimos con la demo en vivo 🎬</p>
+
+      <div class="qr-grid" id="qrGrid">
+        <div class="qr-card">
+          <p>🌐 Probar la app</p>
+          <small>Web · PWA</small>
+          <img id="qrWeb" src="" alt="QR app web" width="110" height="110" />
+          <a id="linkWeb" href="https://family-link-rosy.vercel.app" target="_blank" rel="noopener">family-link-rosy.vercel.app</a>
+        </div>
+        <div class="qr-card">
+          <p>💻 Código</p>
+          <small>GitHub</small>
+          <img id="qrGithub" src="" alt="QR GitHub" width="110" height="110" />
+          <a id="linkGithub" href="https://github.com/J0svh/FamilyLink" target="_blank" rel="noopener">github.com/J0svh/FamilyLink</a>
+        </div>
+        <div class="qr-card">
+          <p>📱 APK Android</p>
+          <small id="apkHint">Repositorio · actualiza enlace APK abajo</small>
+          <img id="qrApk" src="" alt="QR APK" width="110" height="110" />
+          <a id="linkApk" href="https://github.com/J0svh/FamilyLink" target="_blank" rel="noopener">Ver en GitHub</a>
+        </div>
+      </div>
+      <p style="margin-top:2rem;color:rgba(255,255,255,0.45);font-size:0.85rem">Gracias por escuchar · ¿Preguntas? · José — TFG DAM 2025/2026</p>
+    </div>
+  </section>
+
+  <script>
+    // ── Enlaces de la presentación (cambia APK_URL cuando tengas descarga directa) ──
+    const PRESENTATION_LINKS = {
+      web: 'https://family-link-rosy.vercel.app',
+      github: 'https://github.com/J0svh/FamilyLink',
+      apk: 'https://github.com/J0svh/FamilyLink', // ej: enlace a Release o Google Drive del .apk
+    };
+    function makeQr(url) {
+      return 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&margin=8&data=' + encodeURIComponent(url);
+    }
+    document.getElementById('qrWeb').src = makeQr(PRESENTATION_LINKS.web);
+    document.getElementById('qrGithub').src = makeQr(PRESENTATION_LINKS.github);
+    document.getElementById('qrApk').src = makeQr(PRESENTATION_LINKS.apk);
+    document.getElementById('linkWeb').href = PRESENTATION_LINKS.web;
+    document.getElementById('linkGithub').href = PRESENTATION_LINKS.github;
+    document.getElementById('linkApk').href = PRESENTATION_LINKS.apk;
+    document.getElementById('linkApk').textContent = PRESENTATION_LINKS.apk.replace('https://', '');
+
+    const slides = document.querySelectorAll('.slide');
+    const progressBar = document.getElementById('progressBar');
+    const btnPrev = document.getElementById('btnPrev');
+    const btnNext = document.getElementById('btnNext');
+    const slideCounter = document.getElementById('slideCounter');
+    const dotsContainer = document.getElementById('slideDots');
+    let currentSlide = 0;
+
+    slides.forEach((_, i) => {
+      const dot = document.createElement('button');
+      dot.className = 'slide-dot' + (i === 0 ? ' active' : '');
+      dot.setAttribute('aria-label', 'Diapositiva ' + (i + 1));
+      dot.addEventListener('click', () => goToSlide(i));
+      dotsContainer.appendChild(dot);
+    });
+    const dots = dotsContainer.querySelectorAll('.slide-dot');
+
+    function updateUI() {
+      const p = ((currentSlide + 1) / slides.length) * 100;
+      progressBar.style.width = p + '%';
+      slideCounter.textContent = (currentSlide + 1) + ' / ' + slides.length;
+      btnPrev.disabled = currentSlide === 0;
+      btnNext.disabled = currentSlide === slides.length - 1;
+      dots.forEach((d, i) => d.classList.toggle('active', i === currentSlide));
+    }
+
+    function goToSlide(i) {
+      if (i < 0 || i >= slides.length) return;
+      currentSlide = i;
+      slides[i].scrollIntoView({ behavior: 'smooth' });
+      updateUI();
+    }
+    window.goToSlide = goToSlide;
+
+    btnPrev.addEventListener('click', () => goToSlide(currentSlide - 1));
+    btnNext.addEventListener('click', () => goToSlide(currentSlide + 1));
+
+    document.addEventListener('keydown', e => {
+      if (['ArrowDown','ArrowRight',' '].includes(e.key)) { e.preventDefault(); goToSlide(currentSlide + 1); }
+      if (['ArrowUp','ArrowLeft'].includes(e.key)) { e.preventDefault(); goToSlide(currentSlide - 1); }
+      if (e.key === 'Home') { e.preventDefault(); goToSlide(0); }
+      if (e.key === 'End') { e.preventDefault(); goToSlide(slides.length - 1); }
+    });
+
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          const idx = +entry.target.dataset.slide;
+          if (!isNaN(idx)) { currentSlide = idx; updateUI(); }
+        }
+      });
+    }, { threshold: 0.35 });
+
+    slides.forEach(s => observer.observe(s));
+    updateUI();
+    slides[0].classList.add('visible');
+  </script>
+
+  <!--
+  ═══════════════════════════════════════════════════════════════
+  PERSONALIZACIÓN
+  ═══════════════════════════════════════════════════════════════
+
+  1. LOGOS (desde favicon.zip → presentacion-assets/)
+     - Barra: presentacion-assets/favicon-96x96.png
+     - Portada/cierre: presentacion-assets/web-app-manifest-512x512.png
+     - También en frontend/public/ para la app React
+
+  2. CAPTURAS DE PANTALLA
+     Añade una slide extra o reemplaza .map-demo con:
+     <img src="capturas/mapa.png" style="width:100%;border-radius:24px">
+
+  3. MÁS CÓDIGO
+     Duplica una slide con class "slide-label code" y pega tu snippet
+     en .code-body usando spans: .kw .fn .str .cm .tp .num .hl
+
+  4. PRESENTAR
+     F11 = pantalla completa | Flechas / Espacio = navegar
+     Flujo: contexto humano → un poco de código → demo en vivo → cierre con futuro
+
+  ═══════════════════════════════════════════════════════════════
+  -->
+</body>
+</html>
